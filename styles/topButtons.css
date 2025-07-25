@@ -1,0 +1,28 @@
+#topBar button {
+    pointer-events: auto;
+    padding: 10px 20px;
+    margin: 8px;
+    background-color: var(--primary);
+    color: var(--text);
+    border: none;
+    border-radius: 28px;
+    font-size: medium;
+}
+
+#topBar #bleBtn {
+    background-color: var(--bluetooth); 
+    color: white;
+}
+
+#topBar #saveBtn {
+    background-color: var(--save-primary);
+}
+
+#topBar #codeBtn {
+    background-color: var(--secondary);
+}
+
+#topBar #runBtn {
+    background-color: var(--accent);
+    color: white;
+}

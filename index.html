@@ -4,8 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Block Programming - MD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Khand:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/palette.css">
+    <link rel="stylesheet" href="styles/minimap.css">
+    <link rel="stylesheet" href="styles/topButtons.css">
+    <link rel="stylesheet" href="styles/toolbox.css">
+
+    <!-- Importing Blockly -->
+	<script src="./node_modules/blockly/blockly_compressed.js"></script>
+	<script src="./node_modules/blockly/blocks_compressed.js"></script>
+	<script src="./node_modules/blockly/javascript_compressed.js"></script>
+	<script src="./node_modules/blockly/python_compressed.js"></script>
+	<script src="./node_modules/blockly/msg/en.js"></script>
+	
+	<!-- Importing Blockly Plugins -->
+	<script src="./node_modules/@blockly/shadow-block-converter/dist/index.js"></script>
+	<script src="./node_modules/@blockly/workspace-minimap/dist/index.js"></script>
 </head>
 <body>
-    
+    <div id="topBar">
+        <div class="left-align">
+            <button id="bleBtn">Bluetooth</button>
+            <button id="saveBtn">Save/Load</button>
+        </div>
+        <div class="center-align">
+            <button id="codeBtn" class="right-align">Show as Code</button>
+        </div>
+        <div class="right-align">
+            <button id="runBtn" class="right-align">Run Program</button>
+        </div>
+    </div>
+
+    <div id="blocklyDiv"></div>
+
+    <img src="svg/Background.svg" alt="Santa walking in the snow forest" class="background background-santa">
+    <img src="svg/Snowflake.svg" alt="Snowflake falling from the sky" class="background background-snowflake">
+
+    <script src="scripts/minimapController.js"></script>
+    <script src="scripts/topBarController.js"></script>
+    <script src="scripts/toolboxController.js"></script>
+    <script src="scripts/customCategory.js"></script>
+    <script src="scripts/customBlocks.js"></script>
+    <script src="scripts/blocklySetup.js"></script>
 </body>
 </html>

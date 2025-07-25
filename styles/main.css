@@ -1,0 +1,70 @@
+:root {
+    --topBar: 85%;
+}
+
+* {
+    font-family: 'Khand', Arial, sans-serif;
+}
+
+#topBar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: var(--topBar);
+    z-index: 1;
+    pointer-events: none;
+    display: flex;
+    padding-top: 10px;
+}
+
+.left-align, .right-align {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.center-align {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0 auto;
+}
+
+#blocklyDiv {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+.blocklyToolbox {
+    width: calc(100% - var(--topBar));
+}
+
+.blocklyMainWorkspaceScrollbar {
+  display: none;
+}
+
+.background {
+    opacity: 0%;
+}
+
+.background-santa {
+    position: fixed;
+    bottom: 10px;
+    right: 10%;
+    width: 50%;
+    opacity: 20%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.background-snowflake {
+    position: fixed;
+    top: 10%;
+    right: 0px;
+    opacity: 20%;
+    width: var(--topBar);
+    pointer-events: none;
+    z-index: 3;
+}

@@ -1,0 +1,27 @@
+:root {
+    /* UI Colors */
+    --primary: #ddd2c0;
+    --secondary: #c6b391;
+    --accent: #513f28;
+    --background: #f4f3f1;
+    --text: #513f28;
+    --warning: #c42329;
+    --tool: #5e5e5e;
+
+    /* Blockly Colors */
+    --category-conditional: #ffba61;
+    --category-function: #e1b4e5;
+    --category-loop: #a7c09b;
+    --category-operation: #ffec8b;
+    --category-variable: #ca85a7;
+    --category-santa: #e47e81;
+    --category-mainloop: #8a9eba;
+
+    /* Special Colors */
+    --bluetooth: #8a9eba;
+    --save-primary: #a7c09b;
+    --save-secondary: #dbddc0;
+    --fast-speed: #b13a32;
+    --mid-speed: #ba584e;
+    --slow-speed: #c78679;
+}
