@@ -1,0 +1,27 @@
+{
+  "kind": "block",
+  "type": "controls_for",
+  "fields": {
+    "VAR": "i"
+  },
+  "inputs": {
+    "FROM": {
+      "shadow": {
+        "type": "math_number",
+        "fields": { "NUM": 1 }
+      }
+    },
+    "TO": {
+      "shadow": {
+        "type": "math_number",
+        "fields": { "NUM": 10 }
+      }
+    },
+    "BY": {
+      "shadow": {
+        "type": "math_number",
+        "fields": { "NUM": 1 }
+      }
+    }
+  }
+}

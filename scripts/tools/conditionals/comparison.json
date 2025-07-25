@@ -1,0 +1,7 @@
+{
+  "kind": "block",
+  "type": "logic_compare",
+  "fields": {
+    "OP": "EQ"
+  }
+}

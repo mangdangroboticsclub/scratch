@@ -1,0 +1,13 @@
+{
+    "kind": "block",
+    "type": "send_msg",
+    "inputs": {
+        "TEXT": {
+            "shadow": {
+                "type": "text",
+                "check": "String"
+            },
+            "appendField": "Send Text"
+        }
+    }
+}

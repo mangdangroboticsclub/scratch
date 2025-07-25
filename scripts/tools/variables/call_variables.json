@@ -1,0 +1,5 @@
+{
+  "kind": "block",
+  "type": "variables_get",
+  "allowNewVariable": false
+}
