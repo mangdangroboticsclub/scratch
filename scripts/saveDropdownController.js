@@ -64,10 +64,14 @@ class SaveDropdownController {
         this.dropdownButton.classList.remove('active');
         this.dropdownMenu.classList.remove('active');
         
+        // Get the animation duration from CSS variable
+        const animationDuration = parseFloat(getComputedStyle(document.documentElement)
+            .getPropertyValue('--dropdown-animation-duration')) * 1000;
+        
         // Hide the dropdown after the animation completes
         setTimeout(() => {
             this.dropdownMenu.style.display = 'none';
-        }, 300); // Match the CSS transition duration
+        }, animationDuration);
     }
 
     handleAction(action) {

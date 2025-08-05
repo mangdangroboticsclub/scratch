@@ -1,4 +1,8 @@
 /* General Dropdown Styles */
+:root {
+    --dropdown-animation-duration: 0.8s;
+}
+
 .dropdown-container {
     position: relative;
     display: inline-block;
@@ -47,7 +51,7 @@
     display: none;
     max-height: 0;
     pointer-events: none;
-    transition: max-height 0.3s ease;
+    transition: max-height var(--dropdown-animation-duration) ease;
     padding-top: 26px; /* Keep padding constant for now */
 }
 
