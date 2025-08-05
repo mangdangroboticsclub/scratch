@@ -11,10 +11,13 @@
     top: 0;
     right: 0;
     width: var(--topBar);
-    z-index: 1;
+    z-index: 20;
     pointer-events: none;
     display: flex;
     padding-top: 10px;
+    /* resize: both; */
+    /* overflow: auto; */
+    /* background-color: red; */
 }
 
 .left-align, .right-align {
