@@ -90,6 +90,8 @@ categoryContents = [
   ...categoryContents
 ];
 
+
+
 const toolbox = {
   kind: 'categoryToolbox',
   contents: categoryContents
@@ -124,7 +126,11 @@ const toolbox = {
 	initializeMinimap(workspace);
 
 	observeFlyoutColor(categoryColors);
-	// Category background colors are now handled by the CustomCategory class
+	
+	if (window.FunctionManager) {
+	  window.functionManager = new window.FunctionManager(workspace);
+	}
+
   })
   .catch(err => console.error('Error loading toolbox:', err));
   
