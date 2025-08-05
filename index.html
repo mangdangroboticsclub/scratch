@@ -9,27 +9,47 @@
     <link rel="stylesheet" href="styles/palette.css">
     <link rel="stylesheet" href="styles/minimap.css">
     <link rel="stylesheet" href="styles/topButtons.css">
+    <link rel="stylesheet" href="styles/dropdown.css">
+    <link rel="stylesheet" href="styles/saveDropdown.css">
     <link rel="stylesheet" href="styles/toolbox.css">
+    <link rel="stylesheet" href="styles/modal.css">
+    <link rel="stylesheet" href="styles/codeModal.css">
+
+    <!-- Prism.js Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" />
 
     <!-- Importing Blockly -->
-	<script src="./node_modules/blockly/blockly_compressed.js"></script>
-	<script src="./node_modules/blockly/blocks_compressed.js"></script>
-	<script src="./node_modules/blockly/javascript_compressed.js"></script>
-	<script src="./node_modules/blockly/python_compressed.js"></script>
-	<script src="./node_modules/blockly/msg/en.js"></script>
-	
-	<!-- Importing Blockly Plugins -->
-	<script src="./node_modules/@blockly/shadow-block-converter/dist/index.js"></script>
-	<script src="./node_modules/@blockly/workspace-minimap/dist/index.js"></script>
+    <script src="./node_modules/blockly/blockly_compressed.js"></script>
+    <script src="./node_modules/blockly/blocks_compressed.js"></script>
+    <script src="./node_modules/blockly/javascript_compressed.js"></script>
+    <script src="./node_modules/blockly/python_compressed.js"></script>
+    <script src="./node_modules/blockly/msg/en.js"></script>
+    
+    <!-- Importing Blockly Plugins -->
+    <script src="./node_modules/@blockly/shadow-block-converter/dist/index.js"></script>
+    <script src="./node_modules/@blockly/workspace-minimap/dist/index.js"></script>
+    <!-- <script src="./node_modules/@blockly/block-shareable-procedures/dist/index.js"></script> -->
 </head>
 <body>
     <div id="topBar">
         <div class="left-align">
             <button id="bleBtn">Bluetooth</button>
-            <button id="saveBtn">Save/Load</button>
+            <div class="dropdown-container">
+                <button id="saveBtn" class="dropdown-button">
+                    Save/Load
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div id="saveDropdown" class="dropdown-menu">
+                    <div class="dropdown-item" data-action="save-now">Save now</div>
+                    <div class="dropdown-item" data-action="export-save">Export save</div>
+                    <div class="dropdown-item" data-action="import-save">Import save</div>
+                    <div class="dropdown-item" data-action="clear-workspace">Clear workspace</div>
+                </div>
+            </div>
         </div>
         <div class="center-align">
-            <button id="codeBtn" class="right-align">Show as Code</button>
+            <button id="codeBtn" class="right-align" data-modal="codeModal">Show as Code</button>
         </div>
         <div class="right-align">
             <button id="runBtn" class="right-align">Run Program</button>
@@ -38,14 +58,47 @@
 
     <div id="blocklyDiv"></div>
 
+    <!-- Modals -->
+     <div id="codeModal" class="modal">
+        <div class="modal-content modal-auto code-modal-content">
+            <div class="modal-header">
+                <h2>Code View</h2>
+                <span class="close-btn" data-modal="codeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="code-copy-btn">
+                    <button id="copyCodeBtn">Copy Code</button>
+                    <button id="copySantaBtn">Copy Santa Code</button>
+                </div>
+                <pre class="line-numbers"><code id="codeOutput" class="language-python"># calculateSum: Returns the sum of two numbers
+def calculate_sum(a, b):
+    return a + b
+
+# Usage example
+result = calculate_sum(5, 10)
+print(f"The sum of 5 and 10 is {result}")
+</code></pre>
+            </div>
+        </div>
+     </div>
+
     <img src="svg/Background.svg" alt="Santa walking in the snow forest" class="background background-santa">
     <img src="svg/Snowflake.svg" alt="Snowflake falling from the sky" class="background background-snowflake">
 
+    <!-- Prism.js Syntax Highlighting Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    
     <script src="scripts/minimapController.js"></script>
     <script src="scripts/topBarController.js"></script>
     <script src="scripts/toolboxController.js"></script>
+    <script src="scripts/modalController.js"></script>
+    <script src="scripts/saveDropdownController.js"></script>
+    <script src="scripts/functionController.js"></script>
     <script src="scripts/customCategory.js"></script>
     <script src="scripts/customBlocks.js"></script>
     <script src="scripts/blocklySetup.js"></script>
+    <script>Prism.highlightAll();</script>
 </body>
 </html>

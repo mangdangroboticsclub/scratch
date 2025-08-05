@@ -7,16 +7,24 @@
     border: none;
     border-radius: 28px;
     font-size: medium;
+    position: relative;
+    z-index: 10; /* Higher than dropdown menu */
+}
+
+#topBar button:hover {
+    filter: brightness(0.9);
+    cursor: pointer;
 }
 
 #topBar #bleBtn {
-    background-color: var(--bluetooth); 
+    background-color: var(--bluetooth);
     color: white;
 }
 
-#topBar #saveBtn {
+/* Remove the old save button styles as it's now handled by dropdown.css */
+/* #topBar #saveBtn {
     background-color: var(--save-primary);
-}
+} */
 
 #topBar #codeBtn {
     background-color: var(--secondary);

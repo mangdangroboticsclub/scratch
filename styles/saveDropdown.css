@@ -1,0 +1,27 @@
+/* Save Dropdown Specific Styles */
+
+/* Save dropdown button colors */
+.dropdown-button#saveBtn {
+    background-color: var(--save-primary);
+    color: var(--text);
+}
+
+/* Save dropdown menu colors - always present */
+#saveDropdown {
+    background-color: var(--save-secondary);
+}
+
+/* Save dropdown item colors */
+#saveDropdown .dropdown-item {
+    background-color: var(--save-secondary);
+    color: var(--text);
+}
+
+#saveDropdown .dropdown-item:hover {
+    background-color: var(--primary);
+}
+
+/* Override the default topButtons styles for the save dropdown button */
+#topBar .dropdown-button#saveBtn {
+    background-color: var(--save-primary);
+}
