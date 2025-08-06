@@ -2,10 +2,10 @@
 .blockly-minimap {
     transition: opacity 0.3s ease-in-out;
     /* Ensure minimap is properly sized */
-    max-width: 25% !important;
-    max-height: 25% !important;
-    min-width: 150px !important;
-    min-height: 100px !important;
+    max-width: 20% !important;
+    max-height: 20% !important;
+    min-width: 120px !important;
+    min-height: 70px !important;
     /* Better positioning */
     z-index: 1000;
     border: 1px solid #ccc;
@@ -14,6 +14,7 @@
     /* Hidden by default */
     opacity: 0;
     pointer-events: none;
+    top: 0; /* Position top dynamically via JS to match topBar height */
 }
 
 .blockly-minimap.visible {

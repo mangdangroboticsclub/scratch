@@ -88,6 +88,17 @@ function initializeMinimap(workspace) {
     // Initialize the minimap (always present but hidden by default)
     const minimap = new PositionedMinimap(workspace);
     minimap.init();
+    // Position minimap below topBar height
+    const minimapElement = document.querySelector('.blockly-minimap');
+    const topBar = document.getElementById('topBar');
+    if (minimapElement && topBar) {
+        minimapElement.style.top = `${topBar.offsetHeight}px`;
+        // Update on window resize
+        window.addEventListener('resize', () => {
+            minimapElement.style.top = `${topBar.offsetHeight}px`;
+        });
+    }
+    
     
     // Initialize the minimap visibility controller
     const minimapController = new MinimapVisibilityController(workspace);
