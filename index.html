@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="styles/toolbox.css">
     <link rel="stylesheet" href="styles/modal.css">
     <link rel="stylesheet" href="styles/codeModal.css">
+    <link rel="stylesheet" href="styles/bluetoothModal.css">
 
     <!-- Prism.js Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
@@ -35,7 +36,13 @@
 <body>
     <div id="topBar">
         <div class="left-align">
-            <button id="bleBtn">Bluetooth</button>
+            <div id="bluetoothButton" class="bluetooth-button-container">
+                <button class="bt-main-button">
+                    📶
+                    <span class="bt-status-badge">Connect</span>
+                    <span class="bt-debug-button">🔧</span>
+                </button>
+            </div>
             <div class="dropdown-container">
                 <button id="saveBtn" class="dropdown-button">
                     Save/Load&nbsp;
@@ -60,6 +67,40 @@
     <div id="blocklyDiv"></div>
 
     <!-- Modals -->
+    <div id="bluetoothModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Bluetooth Debug</h2>
+                <span class="close-btn" data-modal="bluetoothModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="bt-debug-container">
+                    <div class="bt-debug-column">
+                        <div class="bt-tools-section">
+                            <h3>Loaded MCP Tools</h3>
+                            <div id="btToolsList" class="tools-list">
+                                <div class="no-tools">No tools loaded yet</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bt-debug-column">
+                        <div class="bt-log-section">
+                            <h3>Communication Log</h3>
+                            <div class="log-controls">
+                                <button id="btClearLogBtn" class="bt-btn small-btn">🗑️ Clear Log</button>
+                                <label class="auto-scroll-label">
+                                    <input type="checkbox" id="btAutoScrollLog" checked> Auto-scroll
+                                </label>
+                            </div>
+                            <div id="btLog" class="bt-log"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
      <div id="codeModal" class="modal">
         <div class="modal-content modal-auto code-modal-content">
             <div class="modal-header">
@@ -90,6 +131,7 @@
     <script src="scripts/toolboxController.js"></script>
     <script src="scripts/modalController.js"></script>
     <script src="scripts/toastController.js"></script>
+    <script src="scripts/bluetoothController.js"></script>
     <script src="scripts/saveDropdownController.js"></script>
     <script src="scripts/functionController.js"></script>
     <script src="scripts/customCategory.js"></script>

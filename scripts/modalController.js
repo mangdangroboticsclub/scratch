@@ -32,6 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Make modal functions available globally
+    window.modalController = {
+        openModal,
+        closeModal
+    };
+
     openButtons.forEach(button => {
         button.addEventListener('click', () => {
             const modalId = button.getAttribute('data-modal');

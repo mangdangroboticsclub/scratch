@@ -16,10 +16,235 @@
     cursor: pointer;
 }
 
-#topBar #bleBtn {
-    background-color: var(--bluetooth);
+/* Bluetooth Button Container */
+.bluetooth-button-container {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.bt-main-button {
+    background-color: var(--bluetooth) !important;
+    color: white !important;
+    border: none;
+    padding: 10px 16px; /* Normal padding, let flexbox handle spacing */
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: filter 0.3s ease; /* Changed to filter transition */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    min-height: 40px;
+    font-family: 'Khand', sans-serif;
+}
+
+.bt-main-button:hover {
+    filter: brightness(0.9); /* Consistent with other topBar buttons */
+}
+
+.bt-status-badge {
+    background-color: var(--secondary);
+    color: var(--text);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Status Badge States */
+.bt-status-disconnected {
+    background-color: var(--tool); /* Changed to --tool color */
+    color: white; /* Changed to white for better contrast */
+}
+
+.bt-status-disconnected:hover {
+    background-color: var(--success);
     color: white;
 }
+
+/* Main button hover affects status badge color */
+.bt-main-button:hover .bt-status-disconnected {
+    background-color: var(--success);
+    color: white;
+}
+
+.bt-status-connecting {
+    background-color: var(--tool); /* Changed to --tool color */
+    color: white;
+    cursor: not-allowed;
+    animation: pulse-connecting 1.5s infinite;
+}
+
+/* Main button hover affects connecting status (though it's usually disabled) */
+.bt-main-button:hover .bt-status-connecting {
+    background-color: var(--tool);
+    color: white;
+}
+
+@keyframes pulse-connecting {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.bt-status-connected {
+    background-color: var(--success);
+    color: white;
+}
+
+.bt-status-connected:hover {
+    background-color: var(--error);
+}
+
+/* Main button hover affects status badge color */
+.bt-main-button:hover .bt-status-connected {
+    background-color: var(--error);
+}
+
+.bt-status-warning {
+    background-color: var(--error);
+    color: white;
+    animation: pulse-warning 2s infinite;
+}
+
+/* Main button hover affects warning status */
+.bt-main-button:hover .bt-status-warning {
+    background-color: var(--error);
+    color: white;
+}
+
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.bt-debug-button {
+    background-color: transparent; /* Removed background */
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border for visibility */
+    padding: 4px; /* Reduced from 6px */
+    border-radius: 50%;
+    font-size: 10px; /* Reduced from 12px */
+    cursor: pointer;
+    transition: filter 0.3s ease; /* Consistent transition */
+    min-height: 18px; /* Reduced from 24px */
+    width: 18px; /* Reduced from 24px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: visible; /* Always visible now */
+    opacity: 1; /* Always visible now */
+    margin-left: auto; /* Push to the right side of the flex container */
+}
+
+.bt-debug-button.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.bt-debug-button:hover {
+    filter: brightness(0.9); /* Consistent with other buttons */
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle hover background */
+}
+
+/* Loading state for main button */
+.bt-main-button.loading {
+    pointer-events: none;
+}
+
+.bt-main-button.loading::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .bt-main-button {
+        padding: 8px 12px;
+        font-size: 13px;
+        min-height: 36px;
+    }
+    
+    .bt-status-badge {
+        padding: 3px 6px;
+        font-size: 11px;
+    }
+    
+    .bt-debug-button {
+        padding: 3px; /* Reduced for smaller screens */
+        font-size: 9px; /* Reduced for smaller screens */
+        min-height: 16px; /* Reduced to match new smaller size */
+        width: 16px; /* Reduced to match new smaller size */
+    }
+}
+
+@media (max-width: 480px) {
+    .bt-main-button {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-height: 32px;
+    }
+    
+    .bt-status-badge {
+        padding: 2px 5px;
+        font-size: 10px;
+    }
+    
+    .bt-debug-button {
+        padding: 2px; /* Reduced for smallest screens */
+        font-size: 8px; /* Reduced for smallest screens */
+        min-height: 14px; /* Reduced to match new smaller size */
+        width: 14px; /* Reduced to match new smaller size */
+    }
+}
+
+/* Loading state for status text */
+.bt-status-text.loading {
+    position: relative;
+    color: transparent;
+}
+
+.bt-status-text.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Remove old bluetooth button styles */
+/* #topBar #bleBtn {
+    background-color: var(--bluetooth);
+    color: white;
+} */
 
 /* Remove the old save button styles as it's now handled by dropdown.css */
 /* #topBar #saveBtn {

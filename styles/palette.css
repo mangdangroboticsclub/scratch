@@ -6,6 +6,8 @@
     --background: #f4f3f1;
     --text: #513f28;
     --warning: #c42329;
+    --success: #6a9d4a;
+    --error: #c42329;
     --tool: #5e5e5e;
 
     /* Blockly Colors */
@@ -19,6 +21,7 @@
 
     /* Special Colors */
     --bluetooth: #8a9eba;
+    --bluetooth-hover: #6b7fa3;
     --save-primary: #a7c09b;
     --save-secondary: #dbddc0;
     --fast-speed: #b13a32;

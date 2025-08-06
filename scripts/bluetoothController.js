@@ -1,0 +1,815 @@
+// Bluetooth Controller for Santa-Bot Connection
+class BluetoothController {
+    constructor() {
+        this.device = null;
+        this.characteristic = null;
+        this.isConnected = false;
+        this.isConnecting = false;
+        this.chunkedMessages = new Map();
+        this.availableTools = [];
+        this.autoScrollLog = true;
+        this.lastConnectionTime = null;
+        this.sessionData = null;
+        this.autoReconnectAttempted = false;
+        
+        this.init();
+    }
+
+    init() {
+        this.loadSessionData();
+        this.setupEventListeners();
+        this.updateButtonState();
+        this.updateStatus('disconnected');
+        
+        // Attempt auto-reconnection after a short delay to allow other components to initialize
+        setTimeout(() => {
+            this.attemptAutoReconnect();
+        }, 2000);
+        
+        // Start connection monitoring
+        this.startConnectionMonitoring();
+    }
+
+    startConnectionMonitoring() {
+        // Check connection status every 30 seconds
+        setInterval(() => {
+            if (this.isConnected && this.device && !this.device.gatt.connected) {
+                this.log('📡 Connection lost detected by monitoring', 'warning');
+                this.handleUnexpectedDisconnect();
+            }
+        }, 30000);
+    }
+
+    setupEventListeners() {
+        // Bluetooth button structure
+        const bluetoothContainer = document.getElementById('bluetoothButton');
+        const mainButton = bluetoothContainer?.querySelector('.bt-main-button');
+        const statusText = bluetoothContainer?.querySelector('.bt-status-badge');
+        const debugIcon = bluetoothContainer?.querySelector('.bt-debug-button');
+
+        // Status text - acts as connect/disconnect button
+        if (statusText) {
+            statusText.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (this.isConnected) {
+                    this.disconnect();
+                } else {
+                    this.connect();
+                }
+            });
+        }
+
+        // Debug icon (now a span) - opens debug modal
+        if (debugIcon) {
+            debugIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openDebugModal();
+            });
+        }
+
+        // Main button - acts as connect/disconnect when clicked on main area
+        if (mainButton) {
+            mainButton.addEventListener('click', (e) => {
+                // Only handle if clicked on main button area (not status badge or debug icon)
+                if (e.target === mainButton) {
+                    if (this.isConnected) {
+                        this.disconnect();
+                    } else {
+                        this.connect();
+                    }
+                }
+            });
+        }
+
+        // Modal buttons
+        const clearLogBtn = document.getElementById('btClearLogBtn');
+        const autoScrollCheck = document.getElementById('btAutoScrollLog');
+
+        if (clearLogBtn) {
+            clearLogBtn.addEventListener('click', () => this.clearLog());
+        }
+
+        if (autoScrollCheck) {
+            autoScrollCheck.addEventListener('change', (e) => {
+                this.autoScrollLog = e.target.checked;
+            });
+        }
+    }
+
+    // Session Data Management
+    loadSessionData() {
+        try {
+            const savedData = localStorage.getItem('bluetoothSession');
+            if (savedData) {
+                this.sessionData = JSON.parse(savedData);
+                const now = Date.now();
+                const sevenDays = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+                
+                // Check if session data is within 7 days
+                if (this.sessionData.timestamp && (now - this.sessionData.timestamp) < sevenDays) {
+                    this.log('📂 Loaded previous Bluetooth session data', 'info');
+                    this.availableTools = this.sessionData.tools || [];
+                    this.updateToolsList();
+                    
+                    // Load tools into cmd dropdowns immediately
+                    this.loadToolsIntoDropdowns();
+                } else {
+                    this.log('📂 Previous session data expired (older than 7 days)', 'info');
+                    this.clearSessionData();
+                }
+            }
+        } catch (error) {
+            this.log(`❌ Failed to load session data: ${error.message}`, 'error');
+            this.clearSessionData();
+        }
+    }
+
+    saveSessionData() {
+        try {
+            this.sessionData = {
+                timestamp: Date.now(),
+                lastConnectionTime: this.lastConnectionTime,
+                tools: this.availableTools,
+                deviceName: this.device ? this.device.name : null,
+                deviceId: this.device ? this.device.id : null
+            };
+            
+            localStorage.setItem('bluetoothSession', JSON.stringify(this.sessionData));
+            this.log('💾 Saved Bluetooth session data', 'info');
+        } catch (error) {
+            this.log(`❌ Failed to save session data: ${error.message}`, 'error');
+        }
+    }
+
+    clearSessionData() {
+        this.sessionData = null;
+        localStorage.removeItem('bluetoothSession');
+    }
+
+    async attemptAutoReconnect() {
+        if (this.autoReconnectAttempted || this.isConnected || this.isConnecting) {
+            return;
+        }
+
+        this.autoReconnectAttempted = true;
+
+        if (!this.sessionData || !this.sessionData.lastConnectionTime) {
+            this.log('📶 No previous connection to restore', 'info');
+            return;
+        }
+
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+        
+        // Only offer auto-reconnect if last connection was within an hour
+        if ((now - this.sessionData.lastConnectionTime) > oneHour) {
+            this.log('📶 Previous connection too old for auto-reconnect', 'info');
+            return;
+        }
+
+        this.log('📶 Previous connection found - ready to reconnect when you click Bluetooth button', 'info');
+        
+        // Try experimental getDevices API first (if available)
+        const silentReconnectSucceeded = await this.tryReconnectWithGetDevices();
+        
+        // Show a clickable toast for reconnection if silent reconnection didn't work
+        if (!silentReconnectSucceeded && !this.isConnected && window.toast) {
+            const reconnectToast = window.toast.info('📱 Click here to reconnect to Santa-Bot', { 
+                duration: 10000, // Longer duration for user convenience
+                persistent: true // Keep it visible until clicked
+            });
+            
+            // Make the toast clickable for reconnection with special styling
+            if (reconnectToast) {
+                reconnectToast.classList.add('clickable-reconnect');
+                reconnectToast.addEventListener('click', () => {
+                    this.log('🔄 Reconnecting via toast click...', 'info');
+                    window.toast.hide(reconnectToast); // Hide the toast immediately
+                    this.connect(true); // Connect with auto-reconnect flag
+                });
+                
+                // Add a subtle animation hint
+                reconnectToast.title = 'Click to reconnect to Santa-Bot';
+            }
+        }
+        
+        // Update button text to indicate reconnection is available (only if not connected)
+        const bleBtn = document.getElementById('bleBtn');
+        if (bleBtn && !this.isConnected) {
+            bleBtn.textContent = 'Reconnect';
+            bleBtn.style.backgroundColor = 'var(--save-primary)';
+        }
+    }
+
+    async tryReconnectWithGetDevices() {
+        // Try experimental getDevices API for silent reconnection
+        try {
+            if (navigator.bluetooth && navigator.bluetooth.getDevices) {
+                this.log('🔍 Trying experimental getDevices API for silent reconnection...', 'info');
+                const devices = await navigator.bluetooth.getDevices();
+                
+                for (const device of devices) {
+                    if (device.name === 'Santa-Bot') {
+                        this.log('📱 Found previously paired Santa-Bot, attempting silent reconnection...', 'info');
+                        this.device = device;
+                        
+                        // Try to reconnect using the existing device
+                        const server = await device.gatt.connect();
+                        const service = await server.getPrimaryService('0d9be2a0-4757-43d9-83df-704ae274b8df');
+                        this.characteristic = await service.getCharacteristic('8116d8c0-d45d-4fdf-998e-33ab8c471d59');
+                        
+                        // Set up listeners
+                        this.characteristic.addEventListener('characteristicvaluechanged', (event) => {
+                            this.handleNotification(event);
+                        });
+                        
+                        device.addEventListener('gattserverdisconnected', () => {
+                            this.log('📡 Device disconnected unexpectedly', 'warning');
+                            this.handleUnexpectedDisconnect();
+                        });
+                        
+                        await this.characteristic.startNotifications();
+                        
+                        this.isConnected = true;
+                        this.lastConnectionTime = Date.now();
+                        this.updateButtonState();
+                        this.updateStatus('connected');
+                        this.saveSessionData();
+                        
+                        this.log('✅ Silent reconnection successful!', 'success');
+                        
+                        if (window.toast) {
+                            window.toast.success('Auto-reconnected to Santa-Bot!');
+                        }
+                        
+                        // Load cached tools and request fresh ones
+                        if (this.availableTools.length > 0) {
+                            this.loadToolsIntoDropdowns();
+                        }
+                        
+                        setTimeout(() => {
+                            this.requestTools();
+                        }, 1000);
+                        
+                        return true; // Indicate successful silent reconnection
+                    }
+                }
+                this.log('📱 No previously paired Santa-Bot found in getDevices', 'info');
+            }
+        } catch (error) {
+            this.log(`🔍 getDevices API failed or not supported: ${error.message}`, 'info');
+        }
+        
+        return false; // Indicate silent reconnection failed or not possible
+    }
+
+    loadToolsIntoDropdowns() {
+        // Wait a bit longer to ensure Blockly and custom blocks are fully initialized
+        setTimeout(() => {
+            if (this.availableTools.length > 0 && window.updateSantaCommandDropdowns) {
+                this.log(`🔧 Loading ${this.availableTools.length} tools into command dropdowns`, 'info');
+                window.updateSantaCommandDropdowns(this.availableTools);
+            } else if (this.availableTools.length > 0) {
+                this.log(`⏳ Waiting for command dropdown system to initialize...`, 'info');
+                // Retry after another delay
+                setTimeout(() => {
+                    if (window.updateSantaCommandDropdowns) {
+                        this.log(`🔧 Loading ${this.availableTools.length} tools into command dropdowns (retry)`, 'info');
+                        window.updateSantaCommandDropdowns(this.availableTools);
+                    }
+                }, 2000);
+            }
+        }, 1000);
+    }
+
+    openDebugModal() {
+        if (window.modalController) {
+            window.modalController.openModal('bluetoothModal');
+        } else {
+            // Fallback direct modal control
+            const modal = document.getElementById('bluetoothModal');
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+    }
+
+    updateButtonState() {
+        const bluetoothContainer = document.getElementById('bluetoothButton');
+        const mainButton = bluetoothContainer?.querySelector('.bt-main-button');
+        const statusText = bluetoothContainer?.querySelector('.bt-status-badge');
+        const debugIcon = bluetoothContainer?.querySelector('.bt-debug-button');
+        
+        if (!statusText || !mainButton) return;
+
+        // Don't update if already in warning state (let it persist until reset)
+        if (statusText.classList.contains('bt-status-warning')) {
+            return;
+        }
+
+        // Remove all state classes from status text
+        statusText.classList.remove('bt-status-connecting', 'bt-status-connected', 'bt-status-disconnected');
+        
+        if (this.isConnecting) {
+            statusText.classList.add('bt-status-connecting');
+            statusText.textContent = 'Connecting...';
+        } else if (this.isConnected) {
+            statusText.classList.add('bt-status-connected');
+            statusText.textContent = 'Connected'; /* Changed to show "Connected" */
+            this.setupConnectedHover(mainButton, statusText); /* Add hover behavior to main button */
+        } else {
+            statusText.classList.add('bt-status-disconnected');
+            statusText.textContent = 'Connect';
+            this.removeConnectedHover(mainButton, statusText); /* Remove hover when disconnected */
+        }
+
+        // Update debug icon visibility based on connection state
+        if (debugIcon) {
+            if (this.isConnected) {
+                debugIcon.classList.add('visible');
+            } else {
+                debugIcon.classList.remove('visible');
+            }
+        }
+    }
+
+    /* Add hover behavior methods */
+    setupConnectedHover(mainButton, statusText) {
+        // Remove any existing listeners first
+        this.removeConnectedHover(mainButton, statusText);
+        
+        const onMouseEnter = () => {
+            if (statusText.classList.contains('bt-status-connected')) {
+                statusText.textContent = 'Disconnect';
+            }
+        };
+        
+        const onMouseLeave = () => {
+            if (statusText.classList.contains('bt-status-connected')) {
+                statusText.textContent = 'Connected';
+            }
+        };
+        
+        mainButton.addEventListener('mouseenter', onMouseEnter);
+        mainButton.addEventListener('mouseleave', onMouseLeave);
+        
+        // Store references for cleanup
+        mainButton._hoverEnter = onMouseEnter;
+        mainButton._hoverLeave = onMouseLeave;
+    }
+
+    removeConnectedHover(mainButton, statusText) {
+        if (mainButton._hoverEnter) {
+            mainButton.removeEventListener('mouseenter', mainButton._hoverEnter);
+            mainButton.removeEventListener('mouseleave', mainButton._hoverLeave);
+            delete mainButton._hoverEnter;
+            delete mainButton._hoverLeave;
+        }
+    }
+
+    // Method to clear warning state
+    clearWarningState() {
+        const bluetoothContainer = document.getElementById('bluetoothButton');
+        const statusText = bluetoothContainer?.querySelector('.bt-status-badge');
+        
+        if (statusText) {
+            statusText.classList.remove('bt-status-warning');
+            this.updateButtonState();
+        }
+    }
+
+    updateStatus(status) {
+        const statusEl = document.getElementById('btStatus');
+        if (!statusEl) return;
+
+        statusEl.className = `status ${status}`;
+        
+        switch (status) {
+            case 'connected':
+                statusEl.textContent = 'Connected to Santa-Bot';
+                break;
+            case 'connecting':
+                statusEl.textContent = 'Connecting...';
+                break;
+            case 'disconnected':
+            default:
+                statusEl.textContent = 'Disconnected';
+                break;
+        }
+    }
+
+    log(message, type = 'info') {
+        const logEl = document.getElementById('btLog');
+        if (!logEl) return;
+
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        
+        logEntry.innerHTML = `
+            <span class="log-timestamp">[${timestamp}]</span>
+            <span class="log-type-${type}">${message}</span>
+        `;
+
+        logEl.appendChild(logEntry);
+
+        if (this.autoScrollLog) {
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+    }
+
+    clearLog() {
+        const logEl = document.getElementById('btLog');
+        if (logEl) {
+            logEl.innerHTML = '';
+        }
+    }
+
+    async connect(isAutoReconnect = false) {
+        if (this.isConnecting || this.isConnected) return;
+
+        try {
+            // Clear any previous warning state
+            this.clearWarningState();
+            
+            this.isConnecting = true;
+            this.updateButtonState();
+            this.updateStatus('connecting');
+            
+            if (isAutoReconnect) {
+                this.log('🔄 Auto-reconnecting to Santa-Bot...', 'info');
+            } else {
+                this.log('🔍 Requesting BLE device...', 'info');
+            }
+
+            // Show loading state on connect button
+            const connectBtn = document.getElementById('btConnectBtn');
+            if (connectBtn) {
+                connectBtn.classList.add('loading');
+            }
+
+            // Request device
+            this.device = await navigator.bluetooth.requestDevice({
+                filters: [{ name: 'Santa-Bot' }],
+                optionalServices: ['0d9be2a0-4757-43d9-83df-704ae274b8df']
+            });
+
+            this.log('📡 Connecting to GATT server...', 'info');
+            const server = await this.device.gatt.connect();
+
+            this.log('🔍 Getting Santa-Bot Robot Control service...', 'info');
+            const service = await server.getPrimaryService('0d9be2a0-4757-43d9-83df-704ae274b8df');
+
+            this.log('🔍 Getting Command & Response characteristic...', 'info');
+            this.characteristic = await service.getCharacteristic('8116d8c0-d45d-4fdf-998e-33ab8c471d59');
+
+            // Set up notification listener
+            this.characteristic.addEventListener('characteristicvaluechanged', (event) => {
+                this.handleNotification(event);
+            });
+
+            // Set up disconnect listener
+            this.device.addEventListener('gattserverdisconnected', () => {
+                this.log('📡 Device disconnected unexpectedly', 'warning');
+                this.handleUnexpectedDisconnect();
+            });
+
+            await this.characteristic.startNotifications();
+            this.log('🔔 Started listening for notifications', 'info');
+
+            this.isConnected = true;
+            this.isConnecting = false;
+            this.lastConnectionTime = Date.now();
+            this.updateButtonState();
+            this.updateStatus('connected');
+            this.log('✅ Connected successfully to Santa-Bot!', 'success');
+
+            // Save session data
+            this.saveSessionData();
+
+            // Show success toast
+            if (window.toast) {
+                const message = isAutoReconnect ? 'Auto-reconnected to Santa-Bot!' : 'Connected to Santa-Bot successfully!';
+                window.toast.success(message);
+            }
+
+            // If we have cached tools, load them immediately into dropdowns
+            if (this.availableTools.length > 0) {
+                this.loadToolsIntoDropdowns();
+            }
+
+            // Request available tools (will update if different from cached)
+            setTimeout(() => {
+                this.requestTools();
+            }, 1000);
+
+        } catch (error) {
+            this.isConnecting = false;
+            this.isConnected = false;
+            this.updateButtonState();
+            this.updateStatus('disconnected');
+            this.log(`❌ Connection failed: ${error.message}`, 'error');
+            
+            if (window.toast) {
+                const message = isAutoReconnect ? 'Auto-reconnect failed' : 'Failed to connect to Santa-Bot';
+                window.toast.error(message);
+            }
+        } finally {
+            // Remove loading state from connect button
+            const connectBtn = document.getElementById('btConnectBtn');
+            if (connectBtn) {
+                connectBtn.classList.remove('loading');
+            }
+        }
+    }
+
+    async disconnect() {
+        if (this.device && this.device.gatt.connected) {
+            this.device.gatt.disconnect();
+        }
+        
+        this.isConnected = false;
+        this.isConnecting = false;
+        // Note: Don't clear availableTools on disconnect to keep them cached
+        this.updateButtonState();
+        this.updateStatus('disconnected');
+        this.updateToolsList();
+        this.log('🔌 Disconnected from device', 'info');
+        
+        // Update session data to reflect disconnection
+        this.saveSessionData();
+        
+        if (window.toast) {
+            window.toast.info('Disconnected from Santa-Bot');
+        }
+    }
+
+    handleUnexpectedDisconnect() {
+        this.isConnected = false;
+        this.isConnecting = false;
+        this.updateButtonState();
+        this.updateStatus('disconnected');
+        this.updateToolsList(); // Keep tools cached
+        
+        // Save session data
+        this.saveSessionData();
+        
+        if (window.toast) {
+            window.toast.warning('Santa-Bot disconnected unexpectedly');
+        }
+        
+        // Offer to reconnect after a delay
+        setTimeout(() => {
+            if (!this.isConnected && !this.isConnecting) {
+                this.log('🔄 Offering to reconnect...', 'info');
+                if (window.toast) {
+                    window.toast.info('Click Bluetooth button to reconnect', { duration: 5000 });
+                }
+            }
+        }, 3000);
+    }
+
+    handleNotification(event) {
+        const response = new TextDecoder().decode(event.target.value);
+        this.log(`📥 Raw BLE notification (${response.length} bytes)`, 'received');
+
+        try {
+            const parsed = JSON.parse(response);
+            
+            if (parsed.chunk) {
+                this.log(`🧩 Handling chunked message (${parsed.chunk.index + 1}/${parsed.chunk.total})`, 'info');
+                this.handleChunkedMessage(parsed.chunk);
+            } else if (parsed.type === 'mcp_response') {
+                this.log('🔧 Processing MCP response', 'success');
+                this.handleMcpResponse(parsed.payload);
+            } else if (parsed.type === 'response' && parsed.text) {
+                this.log(`📝 Text Response: "${parsed.text}"`, 'success');
+            }
+        } catch (e) {
+            this.log(`❌ JSON parsing failed: ${e.message}`, 'error');
+            this.log(`💬 Plain text response: "${response}"`, 'info');
+        }
+    }
+
+    handleChunkedMessage(chunk) {
+        const { id, index, total, data } = chunk;
+        
+        this.log(`📦 Received chunk ${index + 1}/${total} for message ${id} (${data ? data.length : 0} bytes)`, 'info');
+        
+        // Validate chunk data
+        if (!data) {
+            this.log(`❌ Chunk ${index + 1}/${total} has no data`, 'error');
+            return;
+        }
+        
+        // Initialize storage for this message if needed
+        if (!this.chunkedMessages.has(id)) {
+            this.chunkedMessages.set(id, {
+                chunks: new Array(total),
+                receivedCount: 0,
+                total: total
+            });
+            this.log(`🆕 Initialized storage for message ${id} expecting ${total} chunks`, 'info');
+        }
+        
+        const messageData = this.chunkedMessages.get(id);
+        
+        // Store this chunk (avoid duplicates)
+        if (messageData.chunks[index] === undefined) {
+            messageData.chunks[index] = data;
+            messageData.receivedCount++;
+            this.log(`📦 Stored chunk ${index + 1}/${total} (${messageData.receivedCount}/${total} received)`, 'info');
+        } else {
+            this.log(`⚠️ Duplicate chunk ${index + 1}/${total} ignored`, 'info');
+            return;
+        }
+        
+        // Check if we have all chunks
+        if (messageData.receivedCount === messageData.total) {
+            // Reassemble the complete message by joining all chunks
+            const completeMessage = messageData.chunks.join('');
+            this.log(`🔧 Reassembling message ${id}: ${messageData.total} chunks → ${completeMessage.length} bytes`, 'info');
+            
+            // Log the reconstructed payload for debugging
+            const preview = completeMessage.length > 100 ? 
+                completeMessage.substring(0, 100) + '...' : 
+                completeMessage;
+            this.log(`📄 Reconstructed payload preview: ${preview}`, 'info');
+            
+            // Clean up chunk storage
+            this.chunkedMessages.delete(id);
+            
+            // Process the complete message
+            try {
+                const parsed = JSON.parse(completeMessage);
+                this.log(`✅ Message ${id} successfully reconstructed and parsed`, 'success');
+                
+                if (parsed.type === 'response' && parsed.text) {
+                    this.log(`📝 Text Response: "${parsed.text}"`, 'success');
+                } else if (parsed.type === 'mcp_response') {
+                    this.log(`🔧 Processing reconstructed MCP response (${completeMessage.length} bytes)`, 'success');
+                    this.handleMcpResponse(parsed.payload);
+                } else {
+                    this.log(`📋 Other message type: ${parsed.type}`, 'info');
+                }
+            } catch (e) {
+                this.log(`❌ Failed to parse reconstructed message: ${e.message}`, 'error');
+                this.log(`📄 Raw content: ${completeMessage.substring(0, 200)}...`, 'error');
+            }
+        } else {
+            this.log(`⏳ Waiting for ${messageData.total - messageData.receivedCount} more chunks...`, 'info');
+            
+            // Debug: show which chunks we have so far
+            const receivedIndices = [];
+            for (let i = 0; i < messageData.chunks.length; i++) {
+                if (messageData.chunks[i] !== undefined) {
+                    receivedIndices.push(i);
+                }
+            }
+            this.log(`📊 Current chunks received: [${receivedIndices.join(', ')}]`, 'info');
+        }
+    }
+
+    handleMcpResponse(payload) {
+        if (payload && payload.result && payload.result.tools) {
+            const tools = payload.result.tools;
+            this.log(`📋 Found ${tools.length} available tools`, 'success');
+            this.availableTools = tools;
+            this.updateToolsList();
+            
+            // Save updated session data with new tools
+            this.saveSessionData();
+            
+            // Show toast notification
+            if (window.toast) {
+                window.toast.santa(`MCP tooling updated! Found ${tools.length} tools`);
+            }
+            
+            // Update Santa command dropdowns in blocks
+            if (window.updateSantaCommandDropdowns) {
+                window.updateSantaCommandDropdowns(tools);
+            }
+        } else {
+            this.log('⚠️ Invalid MCP response format', 'warning');
+            
+            // Show warning toast and set button to warning state
+            if (window.toast) {
+                window.toast.warning('Invalid MCP response - disconnecting for safety');
+            }
+            
+            // Set button to warning state and disconnect
+            const bluetoothContainer = document.getElementById('bluetoothButton');
+            const statusText = bluetoothContainer?.querySelector('.bt-status-badge');
+            if (statusText) {
+                statusText.classList.remove('bt-status-connecting', 'bt-status-connected', 'bt-status-disconnected');
+                statusText.classList.add('bt-status-warning');
+                statusText.textContent = 'Connection Error';
+            }
+            
+            // Disconnect after a short delay
+            setTimeout(() => {
+                this.disconnect();
+            }, 2000);
+        }
+    }
+
+    updateToolsList() {
+        const toolsList = document.getElementById('btToolsList');
+        if (!toolsList) return;
+
+        if (this.availableTools.length === 0) {
+            toolsList.innerHTML = '<div class="no-tools">No tools loaded yet</div>';
+        } else {
+            const statusText = this.isConnected ? '' : ' (cached)';
+            const toolItems = this.availableTools.map(tool => 
+                `<div class="tool-item" title="${tool.description || tool.name}">${tool.name}</div>`
+            ).join('');
+            
+            let html = toolItems;
+            if (!this.isConnected && this.availableTools.length > 0) {
+                html = `<div class="tools-status">📂 ${this.availableTools.length} cached tools from previous session</div>` + html;
+            }
+            
+            toolsList.innerHTML = html;
+        }
+    }
+
+    async requestTools() {
+        if (!this.isConnected) return;
+
+        const mcpRequest = {
+            type: 'mcp',
+            payload: {
+                method: 'tools/list',
+                params: {}
+            }
+        };
+
+        this.log('📋 Requesting available tools from MCP server', 'info');
+        await this.sendMessage(mcpRequest);
+    }
+
+    async sendMessage(message) {
+        if (!this.isConnected || !this.characteristic) {
+            this.log('❌ Not connected to device', 'error');
+            return false;
+        }
+
+        try {
+            const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
+            const messageBytes = new TextEncoder().encode(messageStr);
+            
+            // Simple send for now - can implement chunking later if needed
+            if (messageBytes.length > 200) {
+                this.log(`⚠️ Message too large (${messageBytes.length} bytes), chunking not implemented yet`, 'warning');
+                return false;
+            }
+
+            await this.characteristic.writeValue(messageBytes);
+            this.log(`📤 Sent message (${messageBytes.length} bytes)`, 'info');
+            return true;
+        } catch (error) {
+            this.log(`❌ Failed to send message: ${error.message}`, 'error');
+            return false;
+        }
+    }
+
+    // Public methods for external use
+    isDeviceConnected() {
+        return this.isConnected;
+    }
+
+    getAvailableTools() {
+        return this.availableTools;
+    }
+
+    async executeToolByName(toolName, parameters = {}) {
+        if (!this.isConnected) {
+            this.log('❌ Cannot execute tool: not connected', 'error');
+            return false;
+        }
+
+        const mcpRequest = {
+            type: 'mcp',
+            payload: {
+                method: 'tools/call',
+                params: {
+                    name: toolName,
+                    arguments: parameters
+                }
+            }
+        };
+
+        this.log(`🔧 Executing tool: ${toolName}`, 'info');
+        return await this.sendMessage(mcpRequest);
+    }
+}
+
+// Initialize Bluetooth controller when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.bluetoothController = new BluetoothController();
+    
+    // Make it available as bleManager for compatibility with existing code
+    window.bleManager = window.bluetoothController;
+});
