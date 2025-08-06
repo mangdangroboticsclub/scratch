@@ -1,6 +1,7 @@
 /* General Dropdown Styles */
 :root {
     --dropdown-animation-duration: 0.8s;
+    --dropdown-shrink-duration: 0.3s;
 }
 
 .dropdown-container {
@@ -39,26 +40,30 @@
 
 .dropdown-menu {
     position: absolute;
-    top: 28px; /* Start from halfway down the button (half of ~52px button height) */
-    left: 8px; /* Align with button margin */
-    right: 8px;
+    top: 27px; /* Start from halfway down the button (half of ~52px button height) */
+    left: 50%; /* Center the dropdown */
+    transform: translateX(-50%); /* Center horizontally */
+    width: 20%; /* Shrunk horizontally when hidden */
     border-radius: 12px 12px 0 0;
     box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
     z-index: -1; /* Clearly below the topBar */
     overflow: hidden;
     
     /* Hidden by default - JavaScript will control display */
-    display: none;
     max-height: 0;
     pointer-events: none;
-    transition: max-height var(--dropdown-animation-duration) ease;
+    transition: max-height var(--dropdown-animation-duration) ease,
+                width var(--dropdown-shrink-duration) ease var(--dropdown-animation-duration);
     padding-top: 26px; /* Keep padding constant for now */
 }
 
 .dropdown-menu.active {
-    /* display is controlled by JavaScript */
+    /* Fully expanded when active */
     max-height: 700px; /* Increased max-height */
+    width: calc(100% - 16px); /* Full width when active (accounting for button margins) */
     pointer-events: auto;
+    transition: width var(--dropdown-shrink-duration) ease,
+                max-height var(--dropdown-animation-duration) ease var(--dropdown-shrink-duration);
 }
 
 .dropdown-item {
