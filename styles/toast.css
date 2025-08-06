@@ -1,0 +1,85 @@
+/* Toast Notification System */
+:root {
+    --toast-duration: 3s;
+    --toast-slide-distance: 20px;
+}
+
+.toast-container {
+    position: fixed;
+    right: 20px;
+    z-index: 10000;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    background-color: var(--primary);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: 'Khand', Arial, sans-serif;
+    font-weight: 500;
+    font-size: medium;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 300px;
+    word-wrap: break-word;
+    cursor: pointer;
+    pointer-events: auto;
+    
+    /* Animation properties */
+    transform: translateX(calc(100% + var(--toast-slide-distance)));
+    transition: transform 0.3s ease, opacity 0.3s ease, filter 0.2s ease;
+    opacity: 0;
+}
+
+.toast:hover {
+    filter: brightness(0.9);
+}
+
+.toast:active {
+    filter: brightness(0.8);
+    transform: scale(0.98);
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast.hide {
+    transform: translateX(calc(100% + var(--toast-slide-distance)));
+    opacity: 0;
+}
+
+/* Toast types with different colors */
+.toast.success {
+    background-color: var(--save-primary); /* Green */
+    color: white;
+}
+
+.toast.error {
+    background-color: var(--warning); /* Red */
+    color: white;
+}
+
+.toast.info {
+    background-color: var(--bluetooth); /* Blue-ish */
+    color: white;
+}
+
+.toast.warning {
+    background-color: var(--category-conditional); /* Orange-ish */
+    color: var(--text);
+}
+
+.toast.save {
+    background-color: var(--save-secondary);
+    color: var(--text);
+}
+
+.toast.santa {
+    background-color: var(--category-santa);
+    color: white;
+}

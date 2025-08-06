@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="styles/topButtons.css">
     <link rel="stylesheet" href="styles/dropdown.css">
     <link rel="stylesheet" href="styles/saveDropdown.css">
+    <link rel="stylesheet" href="styles/toast.css">
     <link rel="stylesheet" href="styles/toolbox.css">
     <link rel="stylesheet" href="styles/modal.css">
     <link rel="stylesheet" href="styles/codeModal.css">
@@ -37,7 +38,7 @@
             <button id="bleBtn">Bluetooth</button>
             <div class="dropdown-container">
                 <button id="saveBtn" class="dropdown-button">
-                    Save/Load
+                    Save/Load&nbsp;
                     <span class="dropdown-arrow">▼</span>
                 </button>
                 <div id="saveDropdown" class="dropdown-menu">
@@ -70,13 +71,7 @@
                     <button id="copyCodeBtn">Copy Code</button>
                     <button id="copySantaBtn">Copy Santa Code</button>
                 </div>
-                <pre class="line-numbers"><code id="codeOutput" class="language-python"># calculateSum: Returns the sum of two numbers
-def calculate_sum(a, b):
-    return a + b
-
-# Usage example
-result = calculate_sum(5, 10)
-print(f"The sum of 5 and 10 is {result}")
+                <pre class="line-numbers"><code id="codeOutput" class="language-python"># Placeholder text (no code generation)
 </code></pre>
             </div>
         </div>
@@ -94,6 +89,7 @@ print(f"The sum of 5 and 10 is {result}")
     <script src="scripts/topBarController.js"></script>
     <script src="scripts/toolboxController.js"></script>
     <script src="scripts/modalController.js"></script>
+    <script src="scripts/toastController.js"></script>
     <script src="scripts/saveDropdownController.js"></script>
     <script src="scripts/functionController.js"></script>
     <script src="scripts/customCategory.js"></script>
