@@ -48,10 +48,16 @@ class SaveDropdownController {
             }
         });
 
-        // Close dropdown on escape key
+        // Close dropdown on escape key and handle Ctrl+S for save
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isOpen) {
                 this.closeDropdown();
+            }
+            
+            // Handle Ctrl+S for save-now action
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault(); // Prevent browser's default save dialog
+                this.handleAction('save-now');
             }
         });
 
