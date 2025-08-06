@@ -27,7 +27,7 @@
     background-color: var(--bluetooth) !important;
     color: white !important;
     border: none;
-    padding: 10px 16px; /* Normal padding, let flexbox handle spacing */
+    padding: 10px 28px 10px 16px; /* Extra right padding for debug indicator */
     border-radius: 25px;
     font-weight: 600;
     font-size: 14px;
@@ -39,6 +39,20 @@
     position: relative;
     min-height: 40px;
     font-family: 'Khand', sans-serif;
+}
+
+.bt-main-button .bt-icon {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.bt-main-button .bt-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
 }
 
 .bt-main-button:hover {
@@ -128,6 +142,7 @@
     background-color: transparent; /* Removed background */
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border for visibility */
+    /* Increase debug icon size without affecting main button height */
     padding: 4px; /* Reduced from 6px */
     border-radius: 50%;
     font-size: 10px; /* Reduced from 12px */
@@ -135,12 +150,6 @@
     transition: filter 0.3s ease; /* Consistent transition */
     min-height: 18px; /* Reduced from 24px */
     width: 18px; /* Reduced from 24px */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    visibility: visible; /* Always visible now */
-    opacity: 1; /* Always visible now */
-    margin-left: auto; /* Push to the right side of the flex container */
 }
 
 .bt-debug-button.visible {
@@ -177,9 +186,14 @@
 /* Responsive Design */
 @media (max-width: 768px) {
     .bt-main-button {
-        padding: 8px 12px;
+        padding: 8px 24px 8px 12px; /* Adjusted for responsive design */
         font-size: 13px;
         min-height: 36px;
+    }
+    
+    .bt-main-button::after {
+        right: 6px;
+        font-size: 9px;
     }
     
     .bt-status-badge {
@@ -197,9 +211,14 @@
 
 @media (max-width: 480px) {
     .bt-main-button {
-        padding: 6px 10px;
+        padding: 6px 22px 6px 10px; /* Adjusted for smallest screens */
         font-size: 12px;
         min-height: 32px;
+    }
+    
+    .bt-main-button::after {
+        right: 5px;
+        font-size: 8px;
     }
     
     .bt-status-badge {

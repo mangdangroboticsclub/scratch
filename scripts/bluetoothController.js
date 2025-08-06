@@ -47,7 +47,31 @@ class BluetoothController {
         const statusText = bluetoothContainer?.querySelector('.bt-status-badge');
         const debugIcon = bluetoothContainer?.querySelector('.bt-debug-button');
 
-        // Status text - acts as connect/disconnect button
+        // Main button with dual functionality like the save dropdown
+        if (mainButton) {
+            mainButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // Get button bounds and click position
+                const buttonRect = mainButton.getBoundingClientRect();
+                const clickX = e.clientX;
+                const buttonCenterX = buttonRect.left + buttonRect.width * 0.75; // Right 25% is debug area
+                
+                // If click is in the right 25% of the button, open debug modal
+                if (clickX >= buttonCenterX) {
+                    this.openDebugModal();
+                } else {
+                    // If click is in the left 75% of the button, perform connect/disconnect
+                    if (this.isConnected) {
+                        this.disconnect();
+                    } else {
+                        this.connect();
+                    }
+                }
+            });
+        }
+
+        // Status text - still acts as connect/disconnect button for backward compatibility
         if (statusText) {
             statusText.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -59,25 +83,11 @@ class BluetoothController {
             });
         }
 
-        // Debug icon (now a span) - opens debug modal
+        // Debug icon - keep existing functionality
         if (debugIcon) {
             debugIcon.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.openDebugModal();
-            });
-        }
-
-        // Main button - acts as connect/disconnect when clicked on main area
-        if (mainButton) {
-            mainButton.addEventListener('click', (e) => {
-                // Only handle if clicked on main button area (not status badge or debug icon)
-                if (e.target === mainButton) {
-                    if (this.isConnected) {
-                        this.disconnect();
-                    } else {
-                        this.connect();
-                    }
-                }
             });
         }
 
