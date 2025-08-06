@@ -17,6 +17,11 @@
     color: var(--text);
 }
 
+#saveDropdown .warning {
+    background-color: var(--warning) !important;
+    color: white !important;
+}
+
 #saveDropdown .dropdown-item:hover {
     background-color: var(--primary);
 }
