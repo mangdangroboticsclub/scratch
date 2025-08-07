@@ -130,6 +130,34 @@ const toolbox = {
 	if (window.FunctionManager) {
 	  window.functionManager = new window.FunctionManager(workspace);
 	}
+	
+	// Initialize interpreter with workspace
+	console.log('🔍 Checking interpreter availability...');
+	console.log('window.xiaozhiInterpreter:', !!window.xiaozhiInterpreter);
+	console.log('window.Interpreter:', !!window.Interpreter);
+	
+	if (window.xiaozhiInterpreter) {
+	  const initResult = window.xiaozhiInterpreter.initialize(workspace);
+	  console.log('✅ Interpreter initialized with workspace, result:', initResult);
+	} else {
+	  console.error('❌ xiaozhiInterpreter not found on window object');
+	}
+	
+	// Setup run button with enhanced execution options
+	const runBtn = document.getElementById('runBtn');
+	if (runBtn) {
+	  runBtn.addEventListener('click', () => {
+	    console.log('🔘 Run button clicked - starting enhanced block-by-block execution');
+	    
+	    // Use the enhanced execution controller only
+	    if (window.runBlockByBlock) {
+	      window.runBlockByBlock(10); // 10ms default delay - very fast!
+	    } else {
+	      console.error('❌ Enhanced execution controller not available');
+	      showToast('Execution system not ready. Please reload the page.', { duration: 3000 });
+	    }
+	  });
+	}
 
   })
   .catch(err => console.error('Error loading toolbox:', err));

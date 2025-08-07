@@ -94,6 +94,7 @@ class BluetoothController {
         // Modal buttons
         const clearLogBtn = document.getElementById('btClearLogBtn');
         const autoScrollCheck = document.getElementById('btAutoScrollLog');
+        const reloadToolsBtn = document.getElementById('btReloadToolsBtn');
 
         if (clearLogBtn) {
             clearLogBtn.addEventListener('click', () => this.clearLog());
@@ -103,6 +104,10 @@ class BluetoothController {
             autoScrollCheck.addEventListener('change', (e) => {
                 this.autoScrollLog = e.target.checked;
             });
+        }
+
+        if (reloadToolsBtn) {
+            reloadToolsBtn.addEventListener('click', () => this.manualReloadTools());
         }
     }
 
@@ -342,6 +347,9 @@ class BluetoothController {
                 debugIcon.classList.remove('visible');
             }
         }
+
+        // Update reload tools button state
+        this.updateReloadToolsButton();
     }
 
     /* Add hover behavior methods */
@@ -406,6 +414,23 @@ class BluetoothController {
             default:
                 statusEl.textContent = 'Disconnected';
                 break;
+        }
+    }
+
+    updateReloadToolsButton() {
+        const reloadToolsBtn = document.getElementById('btReloadToolsBtn');
+        if (!reloadToolsBtn) return;
+
+        if (this.isConnected) {
+            reloadToolsBtn.disabled = false;
+            reloadToolsBtn.textContent = '🔄 Reload MCP Tools';
+            reloadToolsBtn.style.opacity = '1';
+            reloadToolsBtn.style.cursor = 'pointer';
+        } else {
+            reloadToolsBtn.disabled = true;
+            reloadToolsBtn.textContent = '🔄 Reload MCP Tools (Not Connected)';
+            reloadToolsBtn.style.opacity = '0.5';
+            reloadToolsBtn.style.cursor = 'not-allowed';
         }
     }
 
@@ -592,7 +617,12 @@ class BluetoothController {
                 this.handleChunkedMessage(parsed.chunk);
             } else if (parsed.type === 'mcp_response') {
                 this.log('🔧 Processing MCP response', 'success');
-                this.handleMcpResponse(parsed.payload);
+                this.log(`🔍 MCP payload check: ${parsed.payload ? 'EXISTS' : 'MISSING'}`, 'info');
+                if (parsed.payload) {
+                    this.handleMcpResponse(parsed.payload);
+                } else {
+                    this.log(`❌ MCP response has no payload`, 'error');
+                }
             } else if (parsed.type === 'response' && parsed.text) {
                 this.log(`📝 Text Response: "${parsed.text}"`, 'success');
             }
@@ -659,7 +689,12 @@ class BluetoothController {
                     this.log(`📝 Text Response: "${parsed.text}"`, 'success');
                 } else if (parsed.type === 'mcp_response') {
                     this.log(`🔧 Processing reconstructed MCP response (${completeMessage.length} bytes)`, 'success');
-                    this.handleMcpResponse(parsed.payload);
+                    this.log(`🔍 MCP payload check: ${parsed.payload ? 'EXISTS' : 'MISSING'}`, 'info');
+                    if (parsed.payload) {
+                        this.handleMcpResponse(parsed.payload);
+                    } else {
+                        this.log(`❌ MCP response has no payload`, 'error');
+                    }
                 } else {
                     this.log(`📋 Other message type: ${parsed.type}`, 'info');
                 }
@@ -682,6 +717,7 @@ class BluetoothController {
     }
 
     handleMcpResponse(payload) {
+        // Handle tools/list responses (tool discovery)
         if (payload && payload.result && payload.result.tools) {
             const tools = payload.result.tools;
             this.log(`📋 Found ${tools.length} available tools`, 'success');
@@ -700,27 +736,22 @@ class BluetoothController {
             if (window.updateSantaCommandDropdowns) {
                 window.updateSantaCommandDropdowns(tools);
             }
-        } else {
-            this.log('⚠️ Invalid MCP response format', 'warning');
-            
-            // Show warning toast and set button to warning state
+        } else if (payload && payload.result !== undefined) {
+            // Handle tools/call responses (function execution results)
+            this.log('🔧 Tool execution response received', 'info');
+            if (payload.result.content) {
+                this.log(`📄 Execution result: ${JSON.stringify(payload.result.content)}`, 'success');
+            }
+        } else if (payload && payload.error) {
+            // Handle MCP error responses
+            this.log(`❌ MCP Error: ${payload.error.message || 'Unknown error'}`, 'error');
             if (window.toast) {
-                window.toast.warning('Invalid MCP response - disconnecting for safety');
+                window.toast.error(`Tool execution failed: ${payload.error.message || 'Unknown error'}`);
             }
-            
-            // Set button to warning state and disconnect
-            const bluetoothContainer = document.getElementById('bluetoothButton');
-            const statusText = bluetoothContainer?.querySelector('.bt-status-badge');
-            if (statusText) {
-                statusText.classList.remove('bt-status-connecting', 'bt-status-connected', 'bt-status-disconnected');
-                statusText.classList.add('bt-status-warning');
-                statusText.textContent = 'Connection Error';
-            }
-            
-            // Disconnect after a short delay
-            setTimeout(() => {
-                this.disconnect();
-            }, 2000);
+        } else {
+            // Log unknown response format but don't treat as critical error
+            this.log('📨 Unknown MCP response format - ignoring', 'info');
+            this.log(`🔍 Payload structure: ${JSON.stringify(payload, null, 2)}`, 'debug');
         }
     }
 
@@ -758,6 +789,23 @@ class BluetoothController {
 
         this.log('📋 Requesting available tools from MCP server', 'info');
         await this.sendMessage(mcpRequest);
+    }
+
+    async manualReloadTools() {
+        if (!this.isConnected) {
+            this.log('❌ Cannot reload tools: not connected to device', 'error');
+            if (window.toast) {
+                window.toast.error('Not connected to Santa-Bot');
+            }
+            return;
+        }
+
+        this.log('🔄 Manually reloading MCP tools...', 'info');
+        if (window.toast) {
+            window.toast.info('Reloading MCP tools...');
+        }
+
+        await this.requestTools();
     }
 
     async sendMessage(message) {
@@ -815,6 +863,42 @@ class BluetoothController {
         return await this.sendMessage(mcpRequest);
     }
 }
+
+// Global functions for interpreter and external use
+window.executeSantaCommand = async function(toolName, parameters = {}) {
+    if (window.bluetoothController) {
+        return await window.bluetoothController.executeToolByName(toolName, parameters);
+    } else {
+        console.log('⚠️ Bluetooth controller not available, simulating command:', toolName);
+        return false;
+    }
+};
+
+window.sendMessage = async function(message) {
+    if (window.bluetoothController) {
+        return await window.bluetoothController.sendMessage(message);
+    } else {
+        console.log('⚠️ Bluetooth controller not available, simulating message send:', message);
+        return false;
+    }
+};
+
+window.getSantaTools = function() {
+    if (window.bluetoothController) {
+        return window.bluetoothController.getAvailableTools();
+    } else {
+        console.log('⚠️ Bluetooth controller not available');
+        return [];
+    }
+};
+
+window.isBluetoothConnected = function() {
+    if (window.bluetoothController) {
+        return window.bluetoothController.isDeviceConnected();
+    } else {
+        return false;
+    }
+};
 
 // Initialize Bluetooth controller when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
