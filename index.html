@@ -32,6 +32,9 @@
     <script src="./node_modules/@blockly/shadow-block-converter/dist/index.js"></script>
     <script src="./node_modules/@blockly/workspace-minimap/dist/index.js"></script>
     <!-- <script src="./node_modules/@blockly/block-shareable-procedures/dist/index.js"></script> -->
+    
+    <!-- JS-Interpreter for safe block-by-block execution -->
+    <script src="acorn_interpreter.js"></script>
 </head>
 <body>
     <div id="topBar">
@@ -81,6 +84,7 @@
                             <div id="btToolsList" class="tools-list">
                                 <div class="no-tools">No tools loaded yet</div>
                             </div>
+                            <button id="btReloadToolsBtn" class="bt-btn reload-tools-btn">🔄 Reload MCP Tools</button>
                         </div>
                     </div>
                     
@@ -136,7 +140,24 @@
     <script src="scripts/functionController.js"></script>
     <script src="scripts/customCategory.js"></script>
     <script src="scripts/customBlocks.js"></script>
+    <script src="scripts/codeGenerator.js"></script>
+    <script src="scripts/interpreter.js"></script>
+    <script src="scripts/executionController.js"></script>
+    <script src="scripts/showCodeModal.js"></script>
+    <script src="scripts/debug.js"></script>
     <script src="scripts/blocklySetup.js"></script>
-    <script>Prism.highlightAll();</script>
+    <script>
+        // Run debug after everything is loaded
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (window.debugCodeGeneration) {
+                    console.log('Running automatic debug check...');
+                    window.debugCodeGeneration();
+                }
+            }, 2000); // Wait 2 seconds for everything to initialize
+        });
+        
+        Prism.highlightAll();
+    </script>
 </body>
 </html>
