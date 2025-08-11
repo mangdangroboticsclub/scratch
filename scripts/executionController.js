@@ -5,6 +5,7 @@
 let currentInterpreter = null;
 let isExecuting = false;
 let executionMode = 'stopped'; // 'stopped', 'fullSpeed', 'blockByBlock', 'stepping'
+let stopBlockExecuted = false; // Flag to track if stop block was executed
 
 function highlightBlock(id) {
   if (window.workspace) {
@@ -126,6 +127,17 @@ function initializeInterpreter() {
     const windowWrapper = interpreter.createObjectProto(interpreter.OBJECT_PROTO);
     interpreter.setProperty(globalObject, 'window', windowWrapper);
     interpreter.setProperty(windowWrapper, 'LoopTrap', 1000);
+
+    // Interpreter stop method for stop blocks
+    interpreter.setProperty(globalObject, 'interpreter', 
+      interpreter.createObjectProto(interpreter.OBJECT_PROTO));
+    interpreter.setProperty(interpreter.getProperty(globalObject, 'interpreter'), 'stop',
+      interpreter.createNativeFunction(function() {
+        console.log('🛑 Stop block executed');
+        stopBlockExecuted = true;
+        return true;
+      })
+    );
   }
 
   currentInterpreter = new Interpreter(code, initApi);
@@ -142,6 +154,7 @@ function runFullSpeed() {
     initializeInterpreter();
     isExecuting = true;
     executionMode = 'fullSpeed';
+    stopBlockExecuted = false; // Reset flag
     
     // Clear any previous highlighting
     if (window.workspace) {
@@ -152,10 +165,16 @@ function runFullSpeed() {
     showToast('Running at full speed...');
     
     while (currentInterpreter.step()) {
-      // Run as fast as possible
+      // Check if stop block was executed
+      if (stopBlockExecuted) {
+        stopExecution();
+        showToast('Program stopped by Stop block');
+        console.log('🛑 Program stopped by Stop block');
+        return;
+      }
     }
     
-    // Execution completed
+    // Execution completed naturally
     stopExecution();
     showToast('Code execution completed!');
     console.log('✅ Full speed execution completed');
@@ -176,6 +195,7 @@ function runBlockByBlock(timeout = 10) {
     initializeInterpreter();
     isExecuting = true;
     executionMode = 'blockByBlock';
+    stopBlockExecuted = false; // Reset flag
     
     if (window.workspace) {
       window.workspace.highlightBlock(null);
@@ -187,11 +207,19 @@ function runBlockByBlock(timeout = 10) {
   
   try {
     if (currentInterpreter.step()) {
+      // Check if stop block was executed
+      if (stopBlockExecuted) {
+        stopExecution();
+        showToast('Program stopped by Stop block');
+        console.log('🛑 Program stopped by Stop block');
+        return;
+      }
+      
       // Get dynamic timeout based on operation type
       const dynamicTimeout = getDynamicTimeout(currentInterpreter, timeout);
       setTimeout(() => runBlockByBlock(timeout), dynamicTimeout);
     } else {
-      // Execution completed
+      // Execution completed naturally
       stopExecution();
       showToast('Block-by-block execution completed!');
       console.log('✅ Block-by-block execution completed');
@@ -269,6 +297,7 @@ function stepOnce() {
     initializeInterpreter();
     isExecuting = true;
     executionMode = 'stepping';
+    stopBlockExecuted = false; // Reset flag
     
     if (window.workspace) {
       window.workspace.highlightBlock(null);
@@ -280,6 +309,14 @@ function stepOnce() {
   
   try {
     if (currentInterpreter.step()) {
+      // Check if stop block was executed
+      if (stopBlockExecuted) {
+        stopExecution();
+        showToast('Program stopped by Stop block');
+        console.log('🛑 Program stopped by Stop block');
+        return;
+      }
+      
       showToast('Step executed. Click Step Once again to continue.');
       console.log('👣 Step executed, waiting for next step...');
     } else {
@@ -298,6 +335,7 @@ function stopExecution() {
   isExecuting = false;
   executionMode = 'stopped';
   currentInterpreter = null;
+  stopBlockExecuted = false; // Reset flag
   
   // Clear any highlighting
   if (window.workspace) {
