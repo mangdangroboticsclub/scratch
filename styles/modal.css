@@ -78,8 +78,8 @@
     max-width: 90vw;
     height: auto;
     min-height: 200px;
-    max-height: 90vh;
-    margin: 5% auto;
+    max-height: 85vh;
+    margin: 5% auto 5% auto;
     display: flex;
     flex-direction: column;
 }
