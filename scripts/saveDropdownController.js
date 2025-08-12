@@ -21,8 +21,11 @@ class SaveDropdownController {
             const buttonRect = this.dropdownButton.getBoundingClientRect();
             const arrowRect = arrow.getBoundingClientRect();
             
-            // If click is within the arrow area (extended from arrow left to button right edge), toggle dropdown
-            if (e.clientX >= arrowRect.left && e.clientX <= buttonRect.right &&
+            // Extend the click area a few pixels to the left of the arrow for easier clicking
+            const extendedLeftEdge = arrowRect.left - 5; // 5 pixels to the left of arrow
+            
+            // If click is within the arrow area (extended from 5px left of arrow to button right edge), toggle dropdown
+            if (e.clientX >= extendedLeftEdge && e.clientX <= buttonRect.right &&
                 e.clientY >= buttonRect.top && e.clientY <= buttonRect.bottom) {
                 this.toggleDropdown();
             } else {
