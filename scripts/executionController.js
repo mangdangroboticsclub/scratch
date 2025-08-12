@@ -6,6 +6,7 @@ let currentInterpreter = null;
 let isExecuting = false;
 let executionMode = 'stopped'; // 'stopped', 'fullSpeed', 'blockByBlock', 'stepping'
 let stopBlockExecuted = false; // Flag to track if stop block was executed
+let executionTimeoutId = null; // Track the timeout ID for block-by-block execution
 
 function highlightBlock(id) {
   if (window.workspace) {
@@ -20,6 +21,40 @@ function showToast(message, options = {}) {
     window.toast.info(message);
   } else if (window.toastController && window.toastController.show) {
     window.toastController.show(message, options);
+  }
+}
+
+function updateExecutionUI() {
+  const runBtn = document.getElementById('runBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  
+  if (runBtn && stopBtn) {
+    // Check Bluetooth connection status
+    const isBluetoothConnected = window.bleManager && window.bleManager.isConnected;
+    
+    if (isExecuting) {
+      // Show stop button, hide run button
+      runBtn.style.display = 'none';
+      stopBtn.style.display = 'inline-block';
+      stopBtn.disabled = false;
+    } else {
+      // Show run button, hide stop button
+      runBtn.style.display = 'inline-block';
+      stopBtn.style.display = 'none';
+      
+      // Enable/disable run button based on Bluetooth connection
+      runBtn.disabled = !isBluetoothConnected;
+      
+      if (!isBluetoothConnected) {
+        runBtn.title = 'Connect to Santa-Bot first to run programs';
+        runBtn.style.opacity = '0.5';
+        runBtn.style.cursor = 'not-allowed';
+      } else {
+        runBtn.title = 'Run Program';
+        runBtn.style.opacity = '1';
+        runBtn.style.cursor = 'pointer';
+      }
+    }
   }
 }
 
@@ -221,6 +256,13 @@ function runFullSpeed() {
     return;
   }
   
+  // Check Bluetooth connection before starting
+  if (!window.bleManager || !window.bleManager.isConnected) {
+    console.warn('❌ Cannot run: BLE device not connected');
+    showToast('Please connect to Santa-Bot first', { duration: 3000 });
+    return;
+  }
+  
   try {
     initializeInterpreter();
     isExecuting = true;
@@ -239,6 +281,7 @@ function runFullSpeed() {
     
     console.log('🚀 Starting full speed execution...');
     showToast('Running at full speed...');
+    updateExecutionUI(); // Update button state
     
     while (currentInterpreter.step()) {
       // Check if stop block was executed
@@ -268,10 +311,18 @@ function runBlockByBlock(timeout = 10) {
   }
   
   if (!isExecuting) {
+    // Check Bluetooth connection before starting
+    if (!window.bleManager || !window.bleManager.isConnected) {
+      console.warn('❌ Cannot run: BLE device not connected');
+      showToast('Please connect to Santa-Bot first', { duration: 3000 });
+      return;
+    }
+    
     initializeInterpreter();
     isExecuting = true;
     executionMode = 'blockByBlock';
     stopBlockExecuted = false; // Reset flag
+    executionTimeoutId = null; // Reset timeout ID
     
     if (window.workspace) {
       window.workspace.highlightBlock(null);
@@ -284,10 +335,24 @@ function runBlockByBlock(timeout = 10) {
     
     console.log('🚀 Starting block-by-block execution...');
     showToast('Starting block-by-block execution...');
+    updateExecutionUI(); // Update button state
   }
   
   try {
     if (currentInterpreter.step()) {
+      // Check if Bluetooth connection was lost during execution
+      if (!window.bleManager || !window.bleManager.isConnected) {
+        console.log('🔗 Bluetooth connection lost during execution');
+        handleBluetoothDisconnection();
+        return;
+      }
+      
+      // Check if execution was stopped while we were stepping
+      if (!isExecuting) {
+        console.log('🛑 Execution was stopped during step, aborting...');
+        return;
+      }
+      
       // Check if stop block was executed
       if (stopBlockExecuted) {
         stopExecution();
@@ -298,7 +363,12 @@ function runBlockByBlock(timeout = 10) {
       
       // Get dynamic timeout based on operation type
       const dynamicTimeout = getDynamicTimeout(currentInterpreter, timeout);
-      setTimeout(() => runBlockByBlock(timeout), dynamicTimeout);
+      executionTimeoutId = setTimeout(() => {
+        // Double-check that execution is still running before continuing
+        if (isExecuting && executionMode === 'blockByBlock') {
+          runBlockByBlock(timeout);
+        }
+      }, dynamicTimeout);
     } else {
       // Execution completed naturally
       stopExecution();
@@ -375,6 +445,13 @@ function stepOnce() {
   }
   
   if (!isExecuting) {
+    // Check Bluetooth connection before starting
+    if (!window.bleManager || !window.bleManager.isConnected) {
+      console.warn('❌ Cannot run: BLE device not connected');
+      showToast('Please connect to Santa-Bot first', { duration: 3000 });
+      return;
+    }
+    
     initializeInterpreter();
     isExecuting = true;
     executionMode = 'stepping';
@@ -391,6 +468,7 @@ function stepOnce() {
     
     console.log('🚀 Starting step-by-step execution...');
     showToast('Starting step-by-step execution...');
+    updateExecutionUI(); // Update button state
   }
   
   try {
@@ -423,6 +501,13 @@ function stopExecution() {
   currentInterpreter = null;
   stopBlockExecuted = false; // Reset flag
   
+  // Clear any pending timeout to prevent restart
+  if (executionTimeoutId) {
+    clearTimeout(executionTimeoutId);
+    executionTimeoutId = null;
+    console.log('🚫 Cleared pending execution timeout');
+  }
+  
   // Clear any highlighting
   if (window.workspace) {
     window.workspace.highlightBlock(null);
@@ -434,17 +519,22 @@ function stopExecution() {
   }
   
   console.log('⏹️ Execution stopped');
-  
-  // Update UI state if function exists
-  if (window.updateExecutionUI) {
-    window.updateExecutionUI();
-  }
+  updateExecutionUI(); // Update button state
 }
 
 function resetExecution() {
   stopExecution();
   showToast('Execution reset!');
   console.log('🔄 Execution reset');
+}
+
+function handleBluetoothDisconnection() {
+  if (isExecuting) {
+    console.log('🔗 Bluetooth disconnected during execution - stopping program');
+    stopExecution();
+    showToast('Program stopped: Santa-Bot disconnected', { duration: 5000 });
+  }
+  updateExecutionUI(); // Update button state
 }
 
 // Expose functions globally for compatibility with existing setup
@@ -455,9 +545,34 @@ window.stopExecution = stopExecution;
 window.resetExecution = resetExecution;
 window.isExecuting = () => isExecuting;
 window.getExecutionMode = () => executionMode;
+window.updateExecutionUI = updateExecutionUI;
+window.handleBluetoothDisconnection = handleBluetoothDisconnection;
 
 // Also expose the individual functions used by our existing interpreter
 window.initializeInterpreter = initializeInterpreter;
 window.highlightBlock = highlightBlock;
+
+// Override any previously defined execution functions to ensure Enhanced Execution Controller takes precedence
+// This is necessary because the Xiaozhi interpreter (interpreter.js) loads before this file
+// and defines its own versions of these functions
+setTimeout(() => {
+  // Force override after all scripts have loaded
+  window.runBlockByBlock = runBlockByBlock;
+  window.stopExecution = stopExecution;
+  window.runContinuous = runFullSpeed; // Map runContinuous to our runFullSpeed
+  window.pauseExecution = () => {
+    // Enhanced execution controller doesn't support pause, so we'll stop instead
+    if (isExecuting) {
+      stopExecution();
+      showToast('Execution stopped (pause not supported)');
+    }
+  };
+  window.resumeExecution = () => {
+    // Enhanced execution controller doesn't support resume, show message
+    showToast('Resume not supported. Please restart execution.');
+  };
+  
+  console.log('🎮 Enhanced Execution Controller functions overridden and secured');
+}, 100);
 
 console.log('🎮 Enhanced Execution Controller loaded with dynamic timing');
