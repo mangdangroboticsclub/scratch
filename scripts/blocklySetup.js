@@ -145,6 +145,8 @@ const toolbox = {
 	
 	// Setup run button with enhanced execution options
 	const runBtn = document.getElementById('runBtn');
+	const stopBtn = document.getElementById('stopBtn');
+	
 	if (runBtn) {
 	  runBtn.addEventListener('click', () => {
 	    console.log('🔘 Run button clicked - starting enhanced block-by-block execution');
@@ -158,6 +160,28 @@ const toolbox = {
 	    }
 	  });
 	}
+	
+	if (stopBtn) {
+	  stopBtn.addEventListener('click', () => {
+	    console.log('🔘 Stop button clicked - stopping execution');
+	    
+	    // Use the enhanced execution controller's stop function
+	    if (window.stopExecution) {
+	      window.stopExecution();
+	    } else {
+	      console.error('❌ Enhanced execution controller not available');
+	      showToast('Stop function not ready. Please reload the page.', { duration: 3000 });
+	    }
+	  });
+	}
+	
+	// Initialize execution UI state
+	setTimeout(() => {
+	  if (window.updateExecutionUI) {
+	    window.updateExecutionUI();
+	    console.log('✅ Execution UI initialized');
+	  }
+	}, 500); // Small delay to ensure all systems are loaded
 
   })
   .catch(err => console.error('Error loading toolbox:', err));
