@@ -2,6 +2,21 @@
     --topBar: 85%;
 }
 
+/* Smooth transitions for topBar width changes */
+.topbar-transitioning {
+    --transition-duration: 0.2s;
+}
+
+.topbar-transitioning #topBar,
+.topbar-transitioning .blocklyToolbox,
+.topbar-transitioning .background-snowflake {
+    transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.topbar-transitioning #blocklyDiv {
+    transition: none !important; /* Prevent blockly canvas from transitioning */
+}
+
 * {
     font-family: 'Khand', Arial, sans-serif;
 }
@@ -11,10 +26,11 @@
     top: 0;
     right: 0;
     width: var(--topBar);
-    z-index: 20;
+    z-index: 30;
     pointer-events: none;
     display: flex;
     padding-top: 10px;
+    transition: width 0.2s linear;
     /* resize: both; */
     /* overflow: auto; */
     /* background-color: red; */
@@ -23,6 +39,10 @@
 .left-align, .right-align {
     display: flex;
     gap: 0.5rem;
+}
+
+.left-align {
+    overflow: visible; /* Allow the toggle button to extend beyond */
 }
 
 .center-align {
@@ -42,6 +62,7 @@
 
 .blocklyToolbox {
     width: calc(100% - var(--topBar));
+    transition: width 0.2s linear;
 }
 
 .blocklyMainWorkspaceScrollbar {
@@ -70,4 +91,5 @@
     width: var(--topBar);
     pointer-events: none;
     z-index: 3;
+    transition: width 0.2s linear;
 }

@@ -11,6 +11,81 @@
     z-index: 10; /* Higher than dropdown menu */
 }
 
+/* Toggle Toolbox Container */
+.toggle-toolbox-container {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    margin: 8px 8px 8px 0px !important;
+    overflow: visible !important;
+}
+
+.toggle-toolbox-background {
+    position: absolute !important;
+    top: 0 !important;
+    right: 100% !important;
+    width: 200px !important;
+    height: 100% !important;
+    background-color: var(--primary) !important;
+    border-radius: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+/* Toggle Toolbox Button - Only the visible right part */
+.toggle-toolbox {
+    padding: 10px 20px !important;
+    margin: 0 !important;
+    background-color: var(--primary) !important;
+    color: var(--text) !important;
+    border: none !important;
+    border-radius: 0 28px 28px 0 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    min-width: 50px !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    z-index: 1 !important;
+}
+
+.toggle-toolbox-arrow {
+    transition: transform 0.2s linear !important;
+    display: inline-block !important;
+    pointer-events: none !important;
+}
+
+.toggle-toolbox:active {
+    transform: scale(0.98) !important;
+}
+
+/* Ripple effect */
+.toggle-toolbox .ripple-effect {
+    position: absolute !important;
+    border-radius: 50% !important;
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    transform: scale(0) !important;
+    animation: ripple-animation 0.6s linear !important;
+    pointer-events: none !important;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+#topBar .toggle-toolbox:hover {
+    filter: none;
+    cursor: pointer;
+}
+
 #topBar button:hover {
     filter: brightness(0.9);
     cursor: pointer;

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="styles/saveDropdown.css">
     <link rel="stylesheet" href="styles/toast.css">
     <link rel="stylesheet" href="styles/toolbox.css">
+    <link rel="stylesheet" href="styles/resizer.css">
     <link rel="stylesheet" href="styles/modal.css">
     <link rel="stylesheet" href="styles/codeModal.css">
     <link rel="stylesheet" href="styles/bluetoothModal.css">
@@ -70,6 +71,11 @@
     </div>
 
     <div id="blocklyDiv"></div>
+
+    <!-- Toolbox Resizer -->
+    <div id="toolboxResizer" class="toolbox-resizer">
+        <div class="resizer-handle"></div>
+    </div>
 
     <!-- Variables Pane -->
     <div id="variablesPane" class="variables-pane">
@@ -157,7 +163,9 @@
     
     <script src="scripts/minimapController.js"></script>
     <script src="scripts/topBarController.js"></script>
+    <script src="scripts/topBarWidthController.js"></script>
     <script src="scripts/toolboxController.js"></script>
+    <script src="scripts/toolboxResizer.js"></script>
     <script src="scripts/modalController.js"></script>
     <script src="scripts/toastController.js"></script>
     <script src="scripts/bluetoothController.js"></script>
