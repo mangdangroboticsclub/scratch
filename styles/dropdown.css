@@ -40,7 +40,7 @@
 
 .dropdown-menu {
     position: absolute;
-    top: 27px; /* Start from halfway down the button (half of ~52px button height) */
+    top: 26px; /* Start from halfway down the button (half of ~52px button height) */
     left: 50%; /* Center the dropdown */
     transform: translateX(-50%); /* Center horizontally */
     width: 20%; /* Shrunk horizontally when hidden */
