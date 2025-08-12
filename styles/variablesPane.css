@@ -1,4 +1,8 @@
 /* Variables Pane Styling */
+:root {
+    --refresh-spin-duration: 1s;
+}
+
 .variables-pane {
     position: fixed;
     bottom: 20px; /* Bottom left positioning */
@@ -36,6 +40,34 @@
     margin: 0;
     font-size: 16px;
     font-weight: 600;
+}
+
+.refresh-variables-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    min-width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refresh-variables-btn:hover {
+    transform: rotate(180deg);
+}
+
+.refresh-variables-btn.spinning {
+    animation: spin var(--refresh-spin-duration) ease-in-out;
+}
+
+.refresh-variables-btn.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .toggle-btn {
@@ -151,6 +183,15 @@
     }
     100% {
         background-color: transparent;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(180deg);
+    }
+    100% {
+        transform: rotate(900deg);
     }
 }
 

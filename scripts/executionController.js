@@ -219,6 +219,11 @@ function runFullSpeed() {
       window.workspace.highlightBlock(null);
     }
     
+    // Hide refresh button during execution
+    if (window.variablesPaneController) {
+      window.variablesPaneController.hideRefreshButton();
+    }
+    
     console.log('🚀 Starting full speed execution...');
     showToast('Running at full speed...');
     
@@ -257,6 +262,11 @@ function runBlockByBlock(timeout = 10) {
     
     if (window.workspace) {
       window.workspace.highlightBlock(null);
+    }
+    
+    // Hide refresh button during execution
+    if (window.variablesPaneController) {
+      window.variablesPaneController.hideRefreshButton();
     }
     
     console.log('🚀 Starting block-by-block execution...');
@@ -361,6 +371,11 @@ function stepOnce() {
       window.workspace.highlightBlock(null);
     }
     
+    // Hide refresh button during execution
+    if (window.variablesPaneController) {
+      window.variablesPaneController.hideRefreshButton();
+    }
+    
     console.log('🚀 Starting step-by-step execution...');
     showToast('Starting step-by-step execution...');
   }
@@ -398,6 +413,11 @@ function stopExecution() {
   // Clear any highlighting
   if (window.workspace) {
     window.workspace.highlightBlock(null);
+  }
+  
+  // Show refresh button when execution stops
+  if (window.variablesPaneController) {
+    window.variablesPaneController.showRefreshButton();
   }
   
   console.log('⏹️ Execution stopped');

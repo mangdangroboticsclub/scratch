@@ -9,6 +9,7 @@ class VariablesPaneController {
         this.table = null;
         this.tableBody = null;
         this.toggleBtn = null;
+        this.refreshBtn = null;
         this.variables = new Map(); // Store variable name -> value mapping
         this.isVisible = true;
         this.isUserHidden = false; // Track if user manually hid the pane
@@ -23,8 +24,9 @@ class VariablesPaneController {
         this.table = document.getElementById('variablesTable');
         this.tableBody = document.getElementById('variablesTableBody');
         this.toggleBtn = document.getElementById('toggleVariablesPaneBtn');
+        this.refreshBtn = document.getElementById('refreshVariablesBtn');
 
-        if (!this.pane || !this.table || !this.tableBody || !this.toggleBtn) {
+        if (!this.pane || !this.table || !this.tableBody || !this.toggleBtn || !this.refreshBtn) {
             console.error('❌ Variables pane elements not found');
             return;
         }
@@ -47,13 +49,9 @@ class VariablesPaneController {
             this.toggle();
         });
 
-        // Listen for execution events to clear variables
-        document.addEventListener('executionStarted', () => {
-            this.clearVariables();
-        });
-
-        document.addEventListener('executionStopped', () => {
-            // Keep variables visible after execution for debugging
+        // Refresh variables (manual clear)
+        this.refreshBtn.addEventListener('click', () => {
+            this.refreshVariables();
         });
     }
 
@@ -231,6 +229,48 @@ class VariablesPaneController {
         this.tableBody.innerHTML = '';
         this.showNoVariablesMessage();
         console.log('🧹 All variables cleared');
+    }
+
+    /**
+     * Manually refresh/clear all variables (for user interaction)
+     */
+    refreshVariables() {
+        // Add spinning animation class
+        this.refreshBtn.classList.add('spinning');
+        
+        // Clear all variables
+        this.clearVariables();
+        
+        // Remove spinning class after animation completes
+        // Get the animation duration from CSS variable
+        const duration = getComputedStyle(document.documentElement)
+            .getPropertyValue('--refresh-spin-duration')
+            .trim();
+        const durationMs = parseFloat(duration) * 1000; // Convert to milliseconds
+        
+        setTimeout(() => {
+            this.refreshBtn.classList.remove('spinning');
+        }, durationMs);
+        
+        console.log('🔄 Variables manually refreshed');
+    }
+
+    /**
+     * Hide the refresh button (during execution)
+     */
+    hideRefreshButton() {
+        if (this.refreshBtn) {
+            this.refreshBtn.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Show the refresh button (after execution)
+     */
+    showRefreshButton() {
+        if (this.refreshBtn) {
+            this.refreshBtn.classList.remove('hidden');
+        }
     }
 
     /**
