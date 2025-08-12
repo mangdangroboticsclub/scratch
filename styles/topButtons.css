@@ -353,3 +353,17 @@
     background-color: var(--accent);
     color: white;
 }
+
+#topBar #runBtn:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+}
+
+#topBar #stopBtn {
+    background-color: #e74c3c; /* Red color for stop */
+    color: white;
+}
+
+#topBar #stopBtn:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}
