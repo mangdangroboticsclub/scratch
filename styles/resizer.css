@@ -1,0 +1,116 @@
+/* Toolbox Resizer Styles */
+.toolbox-resizer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: calc(100% - var(--topBar) + 1px);
+    width: 12px;
+    z-index: 25;
+    cursor: col-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: left 0.2s linear, background-color 0.2s ease, opacity 0.3s ease;
+}
+
+.toolbox-resizer.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.toolbox-resizer:hover {
+    background-color: rgba(66, 133, 244, 0.1);
+}
+
+.toolbox-resizer:active {
+    background-color: rgba(66, 133, 244, 0.2);
+}
+
+.resizer-handle {
+    width: 3px;
+    height: 60px;
+    background-color: rgba(66, 133, 244, 0.6);
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    opacity: 0;
+}
+
+.toolbox-resizer:hover .resizer-handle {
+    opacity: 1;
+    height: 80px;
+    background-color: rgba(66, 133, 244, 0.8);
+}
+
+.toolbox-resizer:active .resizer-handle {
+    opacity: 1;
+    height: 100px;
+    background-color: rgba(66, 133, 244, 1);
+    width: 4px;
+}
+
+/* Touch device specific styles */
+@media (hover: none) and (pointer: coarse) {
+    .toolbox-resizer {
+        width: 20px;
+        background-color: rgba(66, 133, 244, 0.05);
+    }
+    
+    .resizer-handle {
+        opacity: 0.7;
+        width: 4px;
+        height: 80px;
+        background-color: rgba(66, 133, 244, 0.7);
+    }
+    
+    .toolbox-resizer:active {
+        background-color: rgba(66, 133, 244, 0.15);
+    }
+    
+    .toolbox-resizer:active .resizer-handle {
+        opacity: 1;
+        height: 120px;
+        background-color: rgba(66, 133, 244, 1);
+        width: 6px;
+    }
+}
+
+/* Global resizing states */
+.resizing-toolbox {
+    cursor: col-resize !important;
+    user-select: none !important;
+}
+
+.resizing-toolbox * {
+    cursor: col-resize !important;
+    user-select: none !important;
+}
+
+.toolbox-resizer.resizing {
+    background-color: rgba(66, 133, 244, 0.2) !important;
+}
+
+.toolbox-resizer.resizing .resizer-handle {
+    opacity: 1 !important;
+    height: 120px !important;
+    background-color: rgba(66, 133, 244, 1) !important;
+    width: 5px !important;
+}
+
+/* Disabled state when flyout is open */
+.toolbox-resizer.disabled {
+    cursor: default !important;
+    background-color: transparent !important;
+}
+
+.toolbox-resizer.disabled .resizer-handle {
+    opacity: 0 !important;
+    transition: opacity 0.3s ease;
+}
+
+.toolbox-resizer.disabled:hover {
+    background-color: transparent !important;
+}
+
+.toolbox-resizer.disabled:hover .resizer-handle {
+    opacity: 0 !important;
+}
