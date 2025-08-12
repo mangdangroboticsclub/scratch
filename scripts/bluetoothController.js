@@ -251,6 +251,11 @@ class BluetoothController {
                         this.updateStatus('connected');
                         this.saveSessionData();
                         
+                        // Update execution UI to enable run button
+                        if (window.updateExecutionUI) {
+                            window.updateExecutionUI();
+                        }
+                        
                         this.log('✅ Silent reconnection successful!', 'success');
                         
                         if (window.toast) {
@@ -520,6 +525,11 @@ class BluetoothController {
             this.updateStatus('connected');
             this.log('✅ Connected successfully to Santa-Bot!', 'success');
 
+            // Update execution UI to enable run button
+            if (window.updateExecutionUI) {
+                window.updateExecutionUI();
+            }
+
             // Save session data
             this.saveSessionData();
 
@@ -572,6 +582,11 @@ class BluetoothController {
         this.updateToolsList();
         this.log('🔌 Disconnected from device', 'info');
         
+        // Stop any running execution and update UI
+        if (window.handleBluetoothDisconnection) {
+            window.handleBluetoothDisconnection();
+        }
+        
         // Update session data to reflect disconnection
         this.saveSessionData();
         
@@ -589,6 +604,11 @@ class BluetoothController {
         
         // Save session data
         this.saveSessionData();
+        
+        // Stop any running execution
+        if (window.handleBluetoothDisconnection) {
+            window.handleBluetoothDisconnection();
+        }
         
         if (window.toast) {
             window.toast.warning('Santa-Bot disconnected unexpectedly');
@@ -728,9 +748,9 @@ class BluetoothController {
             this.saveSessionData();
             
             // Show toast notification
-            if (window.toast) {
-                window.toast.santa(`MCP tooling updated! Found ${tools.length} tools`);
-            }
+            // if (window.toast) {
+            //     window.toast.santa(`MCP tooling updated! Found ${tools.length} tools`);
+            // }
             
             // Update Santa command dropdowns in blocks
             if (window.updateSantaCommandDropdowns) {
