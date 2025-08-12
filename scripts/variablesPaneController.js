@@ -12,8 +12,9 @@ class VariablesPaneController {
         this.refreshBtn = null;
         this.variables = new Map(); // Store variable name -> value mapping
         this.isVisible = true;
-        this.isUserHidden = false; // Track if user manually hid the pane
+        this.isUserHidden = true; // Default to hidden
         this.observer = null; // For watching flyout visibility
+        this.storageKey = 'variablesPaneState'; // Session storage key
         
         this.init();
     }
@@ -31,14 +32,17 @@ class VariablesPaneController {
             return;
         }
 
+        // Load saved state from session storage
+        this.loadState();
+
         // Setup event listeners
         this.setupEventListeners();
         
         // Setup flyout visibility observer
         this.setupFlyoutObserver();
         
-        // Initialize button text
-        this.toggleBtn.textContent = 'Hide Variables';
+        // Initialize UI based on current state
+        this.updateUI();
         
         console.log('✅ Variables Pane Controller initialized');
     }
@@ -115,14 +119,8 @@ class VariablesPaneController {
 
     toggle() {
         this.isUserHidden = !this.isUserHidden;
-        
-        if (this.isUserHidden) {
-            this.pane.classList.add('hidden');
-            this.toggleBtn.textContent = 'Show Variables';
-        } else {
-            this.pane.classList.remove('hidden');
-            this.toggleBtn.textContent = 'Hide Variables';
-        }
+        this.updateUI();
+        this.saveState();
         
         // Update the display based on current flyout state if user is showing the pane
         if (!this.isUserHidden) {
@@ -130,17 +128,50 @@ class VariablesPaneController {
         }
     }
 
+    updateUI() {
+        if (this.isUserHidden) {
+            this.pane.classList.add('hidden');
+            this.toggleBtn.textContent = 'Show Variables';
+        } else {
+            this.pane.classList.remove('hidden');
+            this.toggleBtn.textContent = 'Hide Variables';
+        }
+    }
+
+    saveState() {
+        try {
+            sessionStorage.setItem(this.storageKey, JSON.stringify({
+                isUserHidden: this.isUserHidden
+            }));
+        } catch (error) {
+            console.warn('Failed to save variables pane state to session storage:', error);
+        }
+    }
+
+    loadState() {
+        try {
+            const savedState = sessionStorage.getItem(this.storageKey);
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                this.isUserHidden = state.isUserHidden !== undefined ? state.isUserHidden : true; // Default to hidden
+            }
+        } catch (error) {
+            console.warn('Failed to load variables pane state from session storage:', error);
+            this.isUserHidden = true; // Default to hidden if loading fails
+        }
+    }
+
     show() {
         this.isUserHidden = false;
-        this.pane.classList.remove('hidden');
-        this.toggleBtn.textContent = 'Hide Variables';
+        this.updateUI();
+        this.saveState();
         this.checkFlyoutVisibility();
     }
 
     hide() {
         this.isUserHidden = true;
-        this.pane.classList.add('hidden');
-        this.toggleBtn.textContent = 'Show Variables';
+        this.updateUI();
+        this.saveState();
     }
 
     /**
