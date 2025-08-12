@@ -1,0 +1,173 @@
+/* Variables Pane Styling */
+.variables-pane {
+    position: fixed;
+    bottom: 20px; /* Bottom left positioning */
+    left: calc(100% - var(--topBar) + 1%);
+    width: calc((100% - var(--topBar)) * 0.6); /* 60% of the left area width */
+    max-width: 400px;
+    min-width: 280px;
+    background: #1a1a1a; /* Dark background */
+    border: 2px solid var(--accent-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    font-family: 'Khand', sans-serif;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.variables-pane.hidden {
+    transform: translateY(100%);
+    opacity: 0;
+}
+
+.variables-header {
+    background: #2d2d2d; /* Darker header */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+}
+
+.variables-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.toggle-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.variables-content {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #1a1a1a; /* Dark content background */
+}
+
+.variables-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.variables-table th {
+    background: #333; /* Dark header */
+    color: #fff;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.variables-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #444; /* Dark border */
+    color: #e0e0e0; /* Light text on dark background */
+}
+
+.variables-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.05); /* Subtle zebra striping */
+}
+
+.variables-table tr:hover {
+    background: rgba(255, 102, 128, 0.2); /* Brighter hover for dark theme */
+}
+
+.variable-name {
+    font-weight: 500;
+    color: var(--accent-color);
+}
+
+.variable-value {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    color: #b4d95a; /* Brighter green for default */
+    word-break: break-all;
+}
+
+.variable-value.string {
+    color: #b4d95a; /* Brighter green for strings */
+}
+
+.variable-value.number {
+    color: #66d9ef; /* Much brighter blue for numbers */
+}
+
+.variable-value.boolean {
+    color: #f92672; /* Brighter pink/red for booleans */
+}
+
+.variable-value.undefined {
+    color: #ae81ff; /* Brighter purple for undefined */
+    font-style: italic;
+}
+
+.no-variables {
+    text-align: center;
+    font-style: italic;
+    color: var(--muted-text-color);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .variables-pane {
+        width: 260px;
+        right: 10px;
+        top: 50px;
+    }
+    
+    .variables-table {
+        font-size: 12px;
+    }
+    
+    .variables-table th,
+    .variables-table td {
+        padding: 6px 8px;
+    }
+}
+
+/* Animation for variable updates */
+.variable-updated {
+    animation: variableHighlight 0.5s ease;
+}
+
+@keyframes variableHighlight {
+    0% {
+        background-color: rgba(255, 102, 128, 0.3);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Scrollbar styling for variables content */
+.variables-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.variables-content::-webkit-scrollbar-track {
+    background: var(--surface-color);
+}
+
+.variables-content::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 3px;
+}
+
+.variables-content::-webkit-scrollbar-thumb:hover {
+    background: #e05570;
+}

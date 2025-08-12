@@ -64,6 +64,7 @@ const javascriptGenerator = Blockly.JavaScript;
 // Configure JavaScript generator for execution
 javascriptGenerator.STATEMENT_PREFIX = 'highlightBlock(%1);\n';
 javascriptGenerator.addReservedWords('highlightBlock');
+javascriptGenerator.addReservedWords('setVar');
 
 window.LoopTrap = 1000;
 javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--window.LoopTrap == 0) throw "Infinite loop.";\n';
@@ -75,6 +76,24 @@ javascriptGenerator.forBlock['start_flag'] = function(block, generator) {
 
 javascriptGenerator.forBlock['stop_flag'] = function(block, generator) {
     return '// Program ends here\ninterpreter.stop();\n';
+};
+
+// Variable assignment with setVar tracking
+javascriptGenerator.forBlock['variables_set'] = function(block, generator) {
+    const variable = generator.getVariableName(block.getFieldValue('VAR'));
+    const value = generator.valueToCode(block, 'VALUE', generator.ORDER_ASSIGNMENT) || '0';
+    const blockId = block.id;
+    
+    // Generate the assignment and setVar call - setVar will look up the actual value
+    const code = variable + ' = ' + value + ';\n' + 
+                'setVar(\'' + blockId + '=' + variable + '\');\n';
+    return code;
+};
+
+// Variable getter
+javascriptGenerator.forBlock['variables_get'] = function(block, generator) {
+    const variable = generator.getVariableName(block.getFieldValue('VAR'));
+    return [variable, generator.ORDER_ATOMIC];
 };
 
 // JavaScript generators for Santa blocks (for browser execution) - V2 Compatible

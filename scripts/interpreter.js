@@ -148,6 +148,45 @@ class XiaozhiInterpreter {
         interpreter.setProperty(globalObject, 'mathRandomInt',
             interpreter.createNativeFunction(mathRandomIntWrapper));
 
+        // Add setVar function for variable tracking
+        const setVarWrapper = function(rawId) {
+            const rawIdStr = String(rawId);
+            console.log('🔧 setVar called with:', rawIdStr);
+            
+            // Extract variable information - format: blockId=variableName
+            try {
+                const splitIndex = rawIdStr.lastIndexOf('=');
+                if (splitIndex !== -1) {
+                    const blockId = rawIdStr.slice(0, splitIndex);
+                    const variableName = rawIdStr.slice(splitIndex + 1);
+                    
+                    // Get the actual value from the interpreter scope
+                    const currentScope = interpreter.getScope();
+                    let actualValue = 'undefined';
+                    
+                    if (currentScope && currentScope.properties && currentScope.properties[variableName]) {
+                        const prop = currentScope.properties[variableName];
+                        if (prop && prop.data !== undefined) {
+                            actualValue = prop.data;
+                        }
+                    }
+                    
+                    // Update variables pane
+                    if (typeof window.setVariableInPane === 'function') {
+                        window.setVariableInPane(variableName, actualValue, blockId);
+                    }
+                } else {
+                    console.warn('Invalid setVar format:', rawIdStr);
+                }
+            } catch (error) {
+                console.error('Error in setVar:', error);
+            }
+            
+            return interpreter.createPrimitive(true);
+        };
+        interpreter.setProperty(globalObject, 'setVar',
+            interpreter.createNativeFunction(setVarWrapper));
+
         // Add window.LoopTrap support for infinite loop protection
         const windowWrapper = interpreter.createObjectProto(interpreter.OBJECT_PROTO);
         interpreter.setProperty(globalObject, 'window', windowWrapper);
@@ -170,6 +209,14 @@ class XiaozhiInterpreter {
         console.log('🚀 Starting block-by-block execution...');
         this.isRunning = true;
         this.isPaused = false;
+
+        // Clear variables pane at start of execution
+        if (typeof window.variablesPaneController !== 'undefined' && window.variablesPaneController.clearVariables) {
+            window.variablesPaneController.clearVariables();
+        }
+
+        // Dispatch execution started event
+        document.dispatchEvent(new CustomEvent('executionStarted'));
 
         try {
             // Create interpreter instance with API setup
@@ -208,6 +255,14 @@ class XiaozhiInterpreter {
 
         console.log('🚀 Starting continuous execution...');
         this.isRunning = true;
+
+        // Clear variables pane at start of execution
+        if (typeof window.variablesPaneController !== 'undefined' && window.variablesPaneController.clearVariables) {
+            window.variablesPaneController.clearVariables();
+        }
+
+        // Dispatch execution started event
+        document.dispatchEvent(new CustomEvent('executionStarted'));
 
         try {
             // Create interpreter instance with API setup
@@ -301,6 +356,9 @@ class XiaozhiInterpreter {
         this.isRunning = false;
         this.isPaused = false;
         this.currentBlock = null;
+        
+        // Dispatch execution stopped event
+        document.dispatchEvent(new CustomEvent('executionStopped'));
     }
 
     setStepDelay(ms) {

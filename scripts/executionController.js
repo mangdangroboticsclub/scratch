@@ -138,6 +138,64 @@ function initializeInterpreter() {
         return true;
       })
     );
+
+    // Add setVar function for variable tracking
+    interpreter.setProperty(globalObject, 'setVar',
+      interpreter.createNativeFunction(function(rawId) {
+        const rawIdStr = String(rawId);
+        console.log('🔧 setVar called with:', rawIdStr);
+        
+        // Extract variable information - format: blockId=variableName
+        try {
+          const splitIndex = rawIdStr.lastIndexOf('=');
+          if (splitIndex !== -1) {
+            const blockId = rawIdStr.slice(0, splitIndex);
+            const variableName = rawIdStr.slice(splitIndex + 1);
+            
+            // Get the actual value from the interpreter's global object
+            let actualValue = 'undefined';
+            
+            // Try to get the variable value from the global object
+            try {
+              const variableProperty = interpreter.getProperty(globalObject, variableName);
+              if (variableProperty !== undefined) {
+                // Handle JS-Interpreter values correctly
+                if (variableProperty && typeof variableProperty === 'object' && 'data' in variableProperty) {
+                  actualValue = variableProperty.data;
+                } else if (variableProperty && typeof variableProperty === 'object' && 'toString' in variableProperty) {
+                  actualValue = variableProperty.toString();
+                } else {
+                  // Direct primitive value
+                  actualValue = variableProperty;
+                }
+                console.log(`📊 Variable ${variableName} = ${actualValue} (type: ${typeof actualValue}, raw: ${typeof variableProperty})`);
+              } else {
+                console.log(`⚠️ Variable ${variableName} not found in global scope`);
+                // Try to get from the current interpreter state
+                const stateStr = interpreter.stateStack && interpreter.stateStack.length > 0 ? 
+                  JSON.stringify(interpreter.stateStack[0], null, 2) : 'No state';
+                console.log('Current interpreter state:', stateStr);
+                actualValue = 'undefined';
+              }
+            } catch (scopeError) {
+              console.warn(`Could not access variable ${variableName}:`, scopeError);
+              actualValue = 'undefined';
+            }
+            
+            // Update variables pane
+            if (typeof window.setVariableInPane === 'function') {
+              window.setVariableInPane(variableName, actualValue, blockId);
+            }
+          } else {
+            console.warn('Invalid setVar format:', rawIdStr);
+          }
+        } catch (error) {
+          console.error('Error in setVar:', error);
+        }
+        
+        return true;
+      })
+    );
   }
 
   currentInterpreter = new Interpreter(code, initApi);

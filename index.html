@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="styles/modal.css">
     <link rel="stylesheet" href="styles/codeModal.css">
     <link rel="stylesheet" href="styles/bluetoothModal.css">
+    <link rel="stylesheet" href="styles/variablesPane.css">
 
     <!-- Prism.js Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
@@ -61,6 +62,7 @@
         </div>
         <div class="center-align">
             <button id="codeBtn" class="right-align" data-modal="codeModal">Show as Code</button>
+            <button id="toggleVariablesPaneBtn" class="right-align">Variables</button>
         </div>
         <div class="right-align">
             <button id="runBtn" class="right-align">Run Program</button>
@@ -68,6 +70,28 @@
     </div>
 
     <div id="blocklyDiv"></div>
+
+    <!-- Variables Pane -->
+    <div id="variablesPane" class="variables-pane">
+        <div class="variables-header">
+            <h3>Variables</h3>
+        </div>
+        <div class="variables-content">
+            <table id="variablesTable" class="variables-table">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody id="variablesTableBody">
+                    <tr class="no-variables">
+                        <td colspan="2">No variables yet</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Modals -->
     <div id="bluetoothModal" class="modal">
@@ -142,6 +166,7 @@
     <script src="scripts/customBlocks.js"></script>
     <script src="scripts/codeGenerator.js"></script>
     <script src="scripts/interpreter.js"></script>
+    <script src="scripts/variablesPaneController.js"></script>
     <script src="scripts/executionController.js"></script>
     <script src="scripts/showCodeModal.js"></script>
     <script src="scripts/debug.js"></script>
