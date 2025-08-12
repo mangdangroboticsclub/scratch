@@ -1,12 +1,12 @@
 Blockly.Blocks['start_flag'] = {
-  init: function() {
+  init: function () {
     this.appendDummyInput().appendField("Start");
     this.setNextStatement(true, null);
     this.setColour(120);
     this.setTooltip("Start flag (only one allowed, the new one will disappear)");
     this.setHelpUrl("");
   },
-  onchange: function(event) {
+  onchange: function (event) {
     if (!this.workspace || this.isInFlyout) return;
     // Only act if this block is not connected (i.e., just placed or top-level)
     if (this.parentBlock_) return;
@@ -23,14 +23,14 @@ Blockly.Blocks['start_flag'] = {
 };
 
 Blockly.Blocks['stop_flag'] = {
-  init: function() {
+  init: function () {
     this.appendDummyInput().appendField("Stop");
     this.setPreviousStatement(true, null);
     this.setColour(0);
     this.setTooltip("Stop flag (only one allowed, the new one will disappear)");
     this.setHelpUrl("");
   },
-  onchange: function(event) {
+  onchange: function (event) {
     if (!this.workspace || this.isInFlyout) return;
     if (this.parentBlock_) return;
     if (event && event.type !== Blockly.Events.BLOCK_CREATE && event.type !== Blockly.Events.BLOCK_MOVE) return;
@@ -45,7 +45,7 @@ Blockly.Blocks['stop_flag'] = {
 };
 
 Blockly.Blocks['send_msg'] = {
-  init: function() {
+  init: function () {
     this.appendValueInput("TEXT")
       .setCheck("String")
       .appendField("Send")
@@ -54,7 +54,7 @@ Blockly.Blocks['send_msg'] = {
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour("#FF6680");
-    this.setTooltip("Send a message to Santa");
+    this.setTooltip("Make Santa say something");
     this.setHelpUrl("");
   },
 }
@@ -62,27 +62,27 @@ Blockly.Blocks['send_msg'] = {
 
 // Define a block with a dropdown to send commands to Santa (initially empty)
 Blockly.Blocks['send_cmd_dropdown'] = {
-  init: function() {
+  init: function () {
     this.dropdown = new Blockly.FieldDropdown([["No tools loaded", "NONE"]]);
     this.appendDummyInput("TOOL_SELECT")
-        .appendField("Make Santa")
-        .appendField(this.dropdown, "CMD");
+      .appendField("Make Santa")
+      .appendField(this.dropdown, "CMD");
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour("#FF6680");
     this.setTooltip("Send a command to Santa");
     this.setHelpUrl("");
-    
+
     this.currentTool = null;
     this.availableTools = [];
     this.savedToolData = null; // Store tool data for restoration
-    
+
     // Listen for dropdown changes to update parameter inputs
     this.dropdown.setValidator((newValue) => {
       this.updateParameterInputs(newValue);
       return newValue;
     });
-    
+
     // Check if tools are already available when block is created, but avoid errors
     setTimeout(() => {
       if (window.bleManager && window.bleManager.availableTools && window.bleManager.availableTools.length > 0) {
@@ -95,17 +95,17 @@ Blockly.Blocks['send_cmd_dropdown'] = {
   },
 
   // Add serialization methods to save/restore tool selection and parameters
-  saveExtraState: function() {
+  saveExtraState: function () {
     const state = {};
     const selectedTool = this.getFieldValue('CMD');
-    
+
     console.log('💾 Saving extra state for send_cmd_dropdown, selected tool:', selectedTool, 'currentTool:', this.currentTool);
-    
+
     // Only save if a real tool is selected (not NONE or empty)
     if (selectedTool && selectedTool !== 'NONE' && this.currentTool) {
       state.selectedTool = selectedTool;
       state.toolParameters = {};
-      
+
       // Save current tool data if available
       state.toolData = {
         name: this.currentTool.name,
@@ -113,7 +113,7 @@ Blockly.Blocks['send_cmd_dropdown'] = {
         description: this.currentTool.description
       };
       console.log('📋 Saving tool data:', state.toolData);
-      
+
       // Save parameter values
       if (this.currentTool.inputSchema && this.currentTool.inputSchema.properties) {
         for (const [paramName, paramSchema] of Object.entries(this.currentTool.inputSchema.properties)) {
@@ -127,25 +127,25 @@ Blockly.Blocks['send_cmd_dropdown'] = {
         }
         console.log('🔧 Saving parameters:', state.toolParameters);
       }
-      
+
       const result = state;
       console.log('💾 Save result:', result);
       return result;
     }
-    
+
     console.log('💾 Save result: null (no valid tool selected)');
     return null;
   },
 
-  loadExtraState: function(state) {
+  loadExtraState: function (state) {
     if (!state) {
       console.log('🔄 loadExtraState called with no state');
       return;
     }
-    
+
     console.log('🔄 Loading extra state for send_cmd_dropdown:', state);
     this.savedToolData = state;
-    
+
     // Try to restore immediately if tools are available
     if (window.bleManager && window.bleManager.availableTools && window.bleManager.availableTools.length > 0) {
       console.log('✅ Tools available immediately, restoring state');
@@ -158,38 +158,38 @@ Blockly.Blocks['send_cmd_dropdown'] = {
   },
 
   // Method to restore tool state from saved data
-  restoreToolState: function() {
+  restoreToolState: function () {
     if (!this.savedToolData) return;
-    
+
     console.log('🔧 Restoring tool state:', this.savedToolData);
     const { selectedTool, toolData, toolParameters } = this.savedToolData;
-    
+
     // If we have saved tool data, use it to restore the tool
     if (toolData && selectedTool) {
       console.log('📋 Restoring tool:', selectedTool, toolData);
       // Create a temporary tool object for restoration
       this.currentTool = toolData;
-      
+
       // Update parameter inputs based on saved tool data
       this.updateParameterInputsFromToolData(toolData);
-      
+
       // Update the dropdown menu to include the saved tool
       if (!this.availableTools.find(tool => tool.name === selectedTool)) {
         // Add the saved tool to available tools temporarily for restoration
         this.availableTools.push(toolData);
         this.dropdown.menuGenerator_ = this.availableTools.map(tool => [
-          this.formatToolName(tool.name), 
+          this.formatToolName(tool.name),
           tool.name
         ]);
       }
-      
+
       // Set the dropdown value (now it should be available)
       try {
         this.setFieldValue(selectedTool, 'CMD');
       } catch (e) {
         console.warn('Could not restore dropdown value:', e.message);
       }
-      
+
       // Restore parameter field values
       if (toolParameters) {
         console.log('🔧 Restoring parameters:', toolParameters);
@@ -200,55 +200,55 @@ Blockly.Blocks['send_cmd_dropdown'] = {
           }
         }
       }
-      
+
       // Update tooltip
       this.updateTooltip(toolData);
       console.log('✅ Tool state restored successfully');
     }
-    
+
     this.savedToolData = null;
     this.needsRestoration = false;
   },
 
   // Helper method to update parameter inputs from saved tool data
-  updateParameterInputsFromToolData: function(toolData) {
+  updateParameterInputsFromToolData: function (toolData) {
     this.clearParameterInputs();
-    
+
     if (toolData.inputSchema && toolData.inputSchema.properties) {
       const properties = toolData.inputSchema.properties;
       let inputIndex = 0;
-      
+
       for (const [paramName, paramSchema] of Object.entries(properties)) {
         this.addParameterInput(paramName, paramSchema, inputIndex);
         inputIndex++;
       }
     }
   },
-  
+
   // Method to update dropdown options
-  updateDropdown: function(tools) {
+  updateDropdown: function (tools) {
     this.availableTools = tools || [];
-    
+
     if (!tools || tools.length === 0) {
       this.dropdown.menuGenerator_ = [["No tools loaded", "NONE"]];
       this.clearParameterInputs();
     } else {
       this.dropdown.menuGenerator_ = tools.map(tool => [
-        this.formatToolName(tool.name), 
+        this.formatToolName(tool.name),
         tool.name
       ]);
     }
-    
+
     // Force refresh of the dropdown - but avoid setting invalid values
     if (this.dropdown.sourceBlock_ && this.dropdown.sourceBlock_.rendered) {
       const currentValue = this.dropdown.getValue();
-      
+
       // Check if current value is valid in the new menu
       const validOptions = this.dropdown.getOptions();
       const isCurrentValueValid = validOptions.some(option => option[1] === currentValue);
-      
+
       console.log('🔄 Updating dropdown, current value:', currentValue, 'valid:', isCurrentValueValid, 'options:', validOptions.map(o => o[1]));
-      
+
       if (isCurrentValueValid) {
         // Update parameter inputs for current selection if it's still valid
         this.updateParameterInputs(currentValue);
@@ -259,67 +259,67 @@ Blockly.Blocks['send_cmd_dropdown'] = {
         this.clearParameterInputs();
       }
     }
-    
+
     // Check if this block needs restoration after tools are loaded
     if (this.needsRestoration) {
       console.log('🔄 Block needs restoration, triggering...');
       this.restoreToolState();
     }
   },
-  
+
   // Format tool name for display
-  formatToolName: function(toolName) {
+  formatToolName: function (toolName) {
     return toolName.charAt(0).toUpperCase() + toolName.slice(1).replace(/_/g, ' ');
   },
-  
+
   // Find tool by name
-  findTool: function(toolName) {
+  findTool: function (toolName) {
     return this.availableTools.find(tool => tool.name === toolName);
   },
-  
+
   // Update parameter inputs based on selected tool
-  updateParameterInputs: function(toolName) {
+  updateParameterInputs: function (toolName) {
     if (!toolName || toolName === "NONE") {
       this.clearParameterInputs();
       return;
     }
-    
+
     const tool = this.findTool(toolName);
     if (!tool) {
       this.clearParameterInputs();
       return;
     }
-    
+
     this.currentTool = tool;
     this.clearParameterInputs();
-    
+
     // Add parameter inputs based on tool's input schema
     if (tool.inputSchema && tool.inputSchema.properties) {
       const properties = tool.inputSchema.properties;
       let inputIndex = 0;
-      
+
       for (const [paramName, paramSchema] of Object.entries(properties)) {
         this.addParameterInput(paramName, paramSchema, inputIndex);
         inputIndex++;
       }
     }
-    
+
     // Update tooltip with tool description and parameters
     this.updateTooltip(tool);
   },
-  
+
   // Clear all parameter inputs
-  clearParameterInputs: function() {
+  clearParameterInputs: function () {
     // Remove all inputs except the tool selection
     const inputsToRemove = [];
-    
+
     // Get all input names from the inputList array
     this.inputList.forEach(input => {
       if (input.name && input.name !== "TOOL_SELECT") {
         inputsToRemove.push(input.name);
       }
     });
-    
+
     // Remove each parameter input
     inputsToRemove.forEach(inputName => {
       try {
@@ -330,21 +330,21 @@ Blockly.Blocks['send_cmd_dropdown'] = {
       }
     });
   },
-  
+
   // Add a parameter input based on schema
-  addParameterInput: function(paramName, paramSchema, index) {
+  addParameterInput: function (paramName, paramSchema, index) {
     const inputName = `PARAM_${paramName.toUpperCase()}`;
     const displayName = this.formatToolName(paramName);
-    
+
     // Determine input type based on parameter schema
     if (paramSchema.type === 'number' || paramSchema.type === 'integer') {
       this.appendValueInput(inputName)
-          .setCheck("Number")
-          .appendField(displayName);
+        .setCheck("Number")
+        .appendField(displayName);
     } else if (paramSchema.type === 'boolean') {
       this.appendDummyInput(inputName)
-          .appendField(displayName)
-          .appendField(new Blockly.FieldCheckbox(paramSchema.default || false), `${paramName}_VALUE`);
+        .appendField(displayName)
+        .appendField(new Blockly.FieldCheckbox(paramSchema.default || false), `${paramName}_VALUE`);
     } else if (paramSchema.enum) {
       // Create dropdown for enum values
       const options = paramSchema.enum.map(value => [
@@ -352,24 +352,24 @@ Blockly.Blocks['send_cmd_dropdown'] = {
         value
       ]);
       this.appendDummyInput(inputName)
-          .appendField(displayName)
-          .appendField(new Blockly.FieldDropdown(options), `${paramName}_VALUE`);
+        .appendField(displayName)
+        .appendField(new Blockly.FieldDropdown(options), `${paramName}_VALUE`);
     } else {
       // Default to string/text input
       this.appendValueInput(inputName)
-          .setCheck("String")
-          .appendField(displayName);
+        .setCheck("String")
+        .appendField(displayName);
     }
   },
-  
+
   // Update tooltip with tool information
-  updateTooltip: function(tool) {
+  updateTooltip: function (tool) {
     let tooltip = `Send command to Santa: ${this.formatToolName(tool.name)}`;
-    
+
     if (tool.description) {
       tooltip += `\n\n${tool.description}`;
     }
-    
+
     if (tool.inputSchema && tool.inputSchema.properties) {
       tooltip += '\n\nParameters:';
       for (const [paramName, paramSchema] of Object.entries(tool.inputSchema.properties)) {
@@ -382,21 +382,24 @@ Blockly.Blocks['send_cmd_dropdown'] = {
         }
       }
     }
-    
+
     this.setTooltip(tooltip);
   },
-  
+
   // Get parameter values for execution
-  getParameterValues: function() {
+  getParameterValues: function () {
     const parameters = {};
-    
+
     if (!this.currentTool || !this.currentTool.inputSchema || !this.currentTool.inputSchema.properties) {
       return parameters;
     }
-    
+
+    // Track required params if schema provides them
+    const requiredParams = Array.isArray(this.currentTool.inputSchema.required) ? this.currentTool.inputSchema.required : [];
+
     for (const [paramName, paramSchema] of Object.entries(this.currentTool.inputSchema.properties)) {
       const inputName = `PARAM_${paramName.toUpperCase()}`;
-      
+
       if (paramSchema.type === 'boolean' || paramSchema.enum) {
         // Get value from field
         const field = this.getField(`${paramName}_VALUE`);
@@ -410,12 +413,31 @@ Blockly.Blocks['send_cmd_dropdown'] = {
           // Use placeholder for code generation - will be resolved by generator
           parameters[paramName] = `[[${inputName}]]`;
         } else if (paramSchema.default !== undefined) {
-          // Use default value if no block connected
+          // Use schema default value if provided
           parameters[paramName] = paramSchema.default;
+        } else if (requiredParams.includes(paramName)) {
+          // Provide a sensible fallback so required parameter is still sent
+          if (paramSchema.type === 'number' || paramSchema.type === 'integer') {
+            parameters[paramName] = 0;
+          } else if (paramSchema.type === 'string') {
+            parameters[paramName] = '';
+          } else {
+            // Last resort generic fallback
+            parameters[paramName] = null;
+          }
+          if (console && console.warn) {
+            console.warn(`⚠️ Required parameter "${paramName}" missing input; using fallback value`, parameters[paramName]);
+          }
+        } else if (paramSchema.type === 'number' || paramSchema.type === 'integer') {
+          // For optional numeric params, still send 0 to reduce server-side validation errors expecting a number
+          parameters[paramName] = 0;
+        } else if (paramSchema.type === 'string') {
+          // Optional string param defaults to empty string
+          parameters[paramName] = '';
         }
       }
     }
-    
+
     return parameters;
   }
 };
@@ -423,10 +445,10 @@ Blockly.Blocks['send_cmd_dropdown'] = {
 // Global function to update all send_cmd_dropdown blocks with MCP tools
 function updateSantaCommandDropdowns(tools) {
   if (!window.Blockly || !Blockly.getMainWorkspace) return;
-  
+
   const workspace = Blockly.getMainWorkspace();
   if (!workspace) return;
-  
+
   // Find all send_cmd_dropdown blocks in the workspace
   const blocks = workspace.getAllBlocks(false);
   blocks.forEach(block => {
@@ -434,7 +456,7 @@ function updateSantaCommandDropdowns(tools) {
       block.updateDropdown(tools);
     }
   });
-  
+
   console.log(`Updated ${blocks.filter(b => b.type === 'send_cmd_dropdown').length} Santa command dropdown(s) with ${tools ? tools.length : 0} tools`);
 }
 
@@ -444,14 +466,14 @@ window.updateSantaCommandDropdowns = updateSantaCommandDropdowns;
 // Global function to trigger restoration for blocks that were loaded before tools were available
 function triggerSantaBlockRestoration() {
   if (!window.Blockly || !Blockly.getMainWorkspace) return;
-  
+
   const workspace = Blockly.getMainWorkspace();
   if (!workspace) return;
-  
+
   console.log('🔄 Triggering Santa block restoration...');
   const blocks = workspace.getAllBlocks(false);
   let restoredCount = 0;
-  
+
   blocks.forEach(block => {
     if (block.type === 'send_cmd_dropdown' && block.needsRestoration && typeof block.restoreToolState === 'function') {
       console.log('🔧 Restoring block:', block.id);
@@ -459,7 +481,7 @@ function triggerSantaBlockRestoration() {
       restoredCount++;
     }
   });
-  
+
   console.log(`✅ Restored ${restoredCount} Santa command blocks`);
 }
 
@@ -472,18 +494,18 @@ function debugSantaBlocks() {
     console.log('❌ Blockly not available');
     return;
   }
-  
+
   const workspace = Blockly.getMainWorkspace();
   if (!workspace) {
     console.log('❌ Workspace not available');
     return;
   }
-  
+
   const blocks = workspace.getAllBlocks(false);
   const santaBlocks = blocks.filter(b => b.type === 'send_cmd_dropdown');
-  
+
   console.log(`🔍 Found ${santaBlocks.length} Santa command blocks:`);
-  
+
   santaBlocks.forEach((block, index) => {
     console.log(`📋 Block ${index + 1}:`, {
       id: block.id,
@@ -494,14 +516,14 @@ function debugSantaBlocks() {
       availableTools: block.availableTools.length
     });
   });
-  
+
   console.log('🔧 BLE Manager state:', {
     bleManager: !!window.bleManager,
     isConnected: window.bleManager ? window.bleManager.isConnected : false,
     availableTools: window.bleManager ? window.bleManager.availableTools.length : 0,
     tools: window.bleManager ? window.bleManager.availableTools.map(t => t.name) : []
   });
-  
+
   console.log('💾 Workspace Storage state:', {
     workspaceStorage: !!window.workspaceStorage
   });
@@ -513,7 +535,7 @@ window.debugSantaBlocks = debugSantaBlocks;
 // Test function to simulate tool loading for debugging
 function testSantaBlockPersistence() {
   console.log('🧪 Testing Santa block persistence...');
-  
+
   // Simulate some test tools
   const testTools = [
     {
@@ -537,13 +559,13 @@ function testSantaBlockPersistence() {
       }
     }
   ];
-  
+
   // Simulate BLE manager with tools
   if (!window.bleManager) {
     window.bleManager = {
       availableTools: testTools,
       isConnected: true,
-      triggerBlockRestoration: function() {
+      triggerBlockRestoration: function () {
         console.log('🔄 Mock BLE Manager triggering restoration');
         if (typeof window.triggerSantaBlockRestoration === 'function') {
           window.triggerSantaBlockRestoration();
@@ -553,13 +575,13 @@ function testSantaBlockPersistence() {
   } else {
     window.bleManager.availableTools = testTools;
   }
-  
+
   // Update all Santa blocks
   if (typeof window.updateSantaCommandDropdowns === 'function') {
     window.updateSantaCommandDropdowns(testTools);
     console.log('✅ Updated Santa blocks with test tools');
   }
-  
+
   // Show current state
   setTimeout(() => {
     window.debugSantaBlocks();
@@ -572,40 +594,40 @@ window.testSantaBlockPersistence = testSantaBlockPersistence;
 // Function to manually trigger save for testing
 function testSantaBlockSave() {
   console.log('🧪 Testing Santa block save...');
-  
+
   if (!window.Blockly || !Blockly.getMainWorkspace) {
     console.log('❌ Blockly not available');
     return;
   }
-  
+
   const workspace = Blockly.getMainWorkspace();
   if (!workspace) {
     console.log('❌ Workspace not available');
     return;
   }
-  
+
   const blocks = workspace.getAllBlocks(false);
   const santaBlocks = blocks.filter(b => b.type === 'send_cmd_dropdown');
-  
+
   console.log(`🔍 Testing save for ${santaBlocks.length} Santa command blocks:`);
-  
+
   santaBlocks.forEach((block, index) => {
     console.log(`📋 Block ${index + 1} (${block.id}):`);
     console.log('  - Selected tool:', block.getFieldValue('CMD'));
     console.log('  - Current tool:', block.currentTool ? block.currentTool.name : 'none');
-    
+
     // Manually call saveExtraState to test
     const savedState = block.saveExtraState ? block.saveExtraState() : null;
     console.log('  - Saved state:', savedState);
   });
-  
+
   // Test workspace serialization
   console.log('🔧 Testing workspace serialization...');
   const xml = Blockly.Xml.workspaceToDom(workspace);
   const xmlString = Blockly.Xml.domToPrettyText(xml);
   console.log('📄 Workspace XML preview:');
   console.log(xmlString.substring(0, 1000) + (xmlString.length > 1000 ? '...' : ''));
-  
+
   // Trigger a manual save
   if (window.workspaceStorage && window.workspaceStorage.save) {
     console.log('💾 Triggering manual workspace save...');
@@ -616,7 +638,7 @@ function testSantaBlockSave() {
 // Function to test loading from localStorage
 function testSantaBlockLoad() {
   console.log('🧪 Testing Santa block load...');
-  
+
   const data = localStorage.getItem('blockly_workspace_data');
   if (data) {
     console.log('📄 Found saved workspace data');
@@ -624,11 +646,11 @@ function testSantaBlockLoad() {
       const parsed = JSON.parse(data);
       console.log('📄 Workspace data preview:');
       console.log(parsed.xmlString.substring(0, 1000) + (parsed.xmlString.length > 1000 ? '...' : ''));
-      
+
       // Look for send_cmd_dropdown blocks in the XML
       const santaBlockMatches = parsed.xmlString.match(/<block type="send_cmd_dropdown"[^>]*>/g);
       console.log(`🔍 Found ${santaBlockMatches ? santaBlockMatches.length : 0} Santa blocks in saved XML`);
-      
+
       if (santaBlockMatches) {
         santaBlockMatches.forEach((match, index) => {
           console.log(`  Block ${index + 1}: ${match}`);
@@ -651,19 +673,19 @@ window.testSantaBlockLoad = testSantaBlockLoad;
 // Complete test of save/load cycle
 function testSantaBlockSaveLoadCycle() {
   console.log('🧪 Testing complete Santa block save/load cycle...');
-  
+
   // Step 1: Check current state
   console.log('📋 Step 1: Current state');
   window.debugSantaBlocks();
-  
+
   // Step 2: Test save
   console.log('📋 Step 2: Testing save');
   window.testSantaBlockSave();
-  
+
   // Step 3: Test load
   console.log('📋 Step 3: Testing load');
   window.testSantaBlockLoad();
-  
+
   // Step 4: Simulate a reload by clearing and reloading
   console.log('📋 Step 4: Simulating workspace reload...');
   if (window.workspaceStorage && window.workspaceStorage.load) {
@@ -672,15 +694,15 @@ function testSantaBlockSaveLoadCycle() {
       // Save current state, clear workspace, then reload
       console.log('💾 Saving, clearing, and reloading...');
       window.workspaceStorage.save();
-      
+
       setTimeout(() => {
         workspace.clear();
         console.log('🗑️ Workspace cleared');
-        
+
         setTimeout(() => {
           window.workspaceStorage.load();
           console.log('🔄 Workspace reloaded');
-          
+
           setTimeout(() => {
             console.log('📋 Final state after reload:');
             window.debugSantaBlocks();
@@ -697,24 +719,24 @@ window.testSantaBlockSaveLoadCycle = testSantaBlockSaveLoadCycle;
 // Test if new serialization system is available
 function testBlocklySerializationAPI() {
   console.log('🧪 Testing Blockly serialization API...');
-  
+
   if (!window.Blockly) {
     console.log('❌ Blockly not available');
     return;
   }
-  
+
   console.log('🔍 Blockly object:', Object.keys(Blockly));
   console.log('🔍 Blockly.serialization available:', !!Blockly.serialization);
-  
+
   if (Blockly.serialization) {
     console.log('🔍 Blockly.serialization object:', Object.keys(Blockly.serialization));
     console.log('🔍 Blockly.serialization.workspaces available:', !!Blockly.serialization.workspaces);
-    
+
     if (Blockly.serialization.workspaces) {
       console.log('🔍 Blockly.serialization.workspaces methods:', Object.keys(Blockly.serialization.workspaces));
     }
   }
-  
+
   // Test with a simple workspace
   const workspace = Blockly.getMainWorkspace();
   if (workspace && Blockly.serialization && Blockly.serialization.workspaces) {
@@ -739,7 +761,7 @@ function patchBLEManagerForSantaDropdowns() {
     !window.bleManager._santaDropdownPatched
   ) {
     const origHandleMCPResponse = window.bleManager.handleMCPResponse.bind(window.bleManager);
-    window.bleManager.handleMCPResponse = function(payload) {
+    window.bleManager.handleMCPResponse = function (payload) {
       origHandleMCPResponse(payload);
       if (payload && payload.result && payload.result.tools && window.updateSantaCommandDropdowns) {
         window.updateSantaCommandDropdowns(payload.result.tools);
@@ -769,18 +791,18 @@ function executeSantaCommandBlock(block) {
     console.error('BLE device not connected');
     return false;
   }
-  
+
   const toolName = block.getFieldValue('CMD');
   if (!toolName || toolName === 'NONE') {
     console.error('No tool selected');
     return false;
   }
-  
+
   const parameters = block.getParameterValues ? block.getParameterValues() : {};
-  
+
   // Log the execution
   console.log(`Executing Santa command: ${toolName}`, parameters);
-  
+
   // Execute via BLE manager
   return window.bleManager.executeToolByName(toolName, parameters);
 }
