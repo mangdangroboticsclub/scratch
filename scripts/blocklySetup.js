@@ -123,7 +123,7 @@ const toolbox = {
 	window.workspace = workspace;
 
 	workspace.addChangeListener(shadowBlockConversionChangeListener);
-	initializeMinimap(workspace);
+	// initializeMinimap(workspace);
 
 	observeFlyoutColor(categoryColors);
 	
