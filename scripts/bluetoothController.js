@@ -848,18 +848,48 @@ class BluetoothController {
             return false;
         }
 
+        const originalParameters = parameters;
+        let convertedParameters;
+        // Prefer global interpreter's pseudoToNative if available and parameters look like interpreter objects
+        try {
+            if (window.xiaozhiInterpreter && window.xiaozhiInterpreter.interpreter && window.xiaozhiInterpreter.interpreter.pseudoToNative) {
+                convertedParameters = window.xiaozhiInterpreter.interpreter.pseudoToNative(parameters);
+            }
+        } catch (e) {
+            console.warn('pseudoToNative (global) failed, falling back to manual conversion', e);
+        }
+    if (!convertedParameters) convertedParameters = parameters || {};
+
+        // Determine expected parameter names from tool schema (if known)
+        let expectedParams = [];
+        const tool = this.availableTools.find(t => t.name === toolName);
+        if (tool && tool.inputSchema && tool.inputSchema.properties) {
+            expectedParams = Object.keys(tool.inputSchema.properties);
+        }
+
+        // Compare expected vs provided
+        const providedKeys = Object.keys(convertedParameters);
+        const missingKeys = expectedParams.filter(k => !providedKeys.includes(k));
+
+        // Minimal debug if something missing
+        if (missingKeys.length) {
+            console.warn(`⚠️ Missing expected parameter keys for ${toolName}:`, missingKeys);
+        }
+
         const mcpRequest = {
             type: 'mcp',
             payload: {
                 method: 'tools/call',
                 params: {
                     name: toolName,
-                    arguments: parameters
+                    arguments: convertedParameters
                 }
             }
         };
 
         this.log(`🔧 Executing tool: ${toolName}`, 'info');
+    // Optional concise payload log
+    try { console.log('📤 MCP Params:', JSON.stringify(mcpRequest.payload.params)); } catch (e) {}
         return await this.sendMessage(mcpRequest);
     }
 }

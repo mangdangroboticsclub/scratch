@@ -65,7 +65,21 @@ function initializeInterpreter() {
     }));
 
     interpreter.setProperty(globalObject, 'cmd_dropdown', interpreter.createNativeFunction(function(toolName, parameters) {
-      console.log('Executing Santa command:', toolName, parameters);
+      // Reliable conversion using interpreter's built-in pseudoToNative (handles deep structures & arrays)
+      let nativeParams;
+      try {
+        nativeParams = interpreter.pseudoToNative ? interpreter.pseudoToNative(parameters) : parameters;
+      } catch (e) {
+        console.warn('pseudoToNative conversion failed, falling back to empty object', e);
+        nativeParams = {};
+      }
+
+      // Defensive: ensure plain object
+      if (!nativeParams || typeof nativeParams !== 'object' || Array.isArray(nativeParams)) {
+        nativeParams = nativeParams && typeof nativeParams === 'object' ? nativeParams : {};
+      }
+
+  console.log('Executing Santa command:', toolName, nativeParams);
       
       // Check if BLE is connected before sending command
       if (!window.bleManager || !window.bleManager.isConnected) {
@@ -76,8 +90,7 @@ function initializeInterpreter() {
       
       // Execute the command using v2 compatible function
       if (window.executeSantaCommand) {
-        const params = parameters || {};
-        window.executeSantaCommand(toolName, params).catch(error => {
+  window.executeSantaCommand(toolName, nativeParams).catch(error => {
           console.error('Error executing Santa command:', error);
           showToast('Error executing command: ' + error.message, { duration: 3000 });
         });
