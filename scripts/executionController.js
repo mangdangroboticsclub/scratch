@@ -89,12 +89,31 @@ function initializeInterpreter() {
         return;
       }
       
-      // Send the message using v2 compatible function
-      if (window.sendSantaText) {
-        window.sendSantaText(text).catch(error => {
-          console.error('Error sending Santa text:', error);
-          showToast('Error sending message: ' + error.message, { duration: 3000 });
-        });
+      const textStr = String(text);
+      
+      // Check if the text is JSON (starts with { and ends with })
+      if (textStr.trim().startsWith('{') && textStr.trim().endsWith('}')) {
+        // Send as raw JSON command
+        try {
+          const jsonMessage = JSON.parse(textStr);
+          if (window.sendMessage) {
+            window.sendMessage(jsonMessage).catch(error => {
+              console.error('Error sending JSON command:', error);
+              showToast('Error sending command: ' + error.message, { duration: 3000 });
+            });
+          }
+        } catch (e) {
+          console.error('Invalid JSON in send_msg:', textStr, e);
+          showToast('Invalid JSON command: ' + e.message, { duration: 3000 });
+        }
+      } else {
+        // Send as regular text message using existing function
+        if (window.sendSantaText) {
+          window.sendSantaText(textStr).catch(error => {
+            console.error('Error sending Santa text:', error);
+            showToast('Error sending message: ' + error.message, { duration: 3000 });
+          });
+        }
       }
       return text;
     }));

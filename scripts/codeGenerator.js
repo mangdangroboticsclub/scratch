@@ -6,7 +6,7 @@ const pythonGenerator = Blockly.Python;
 
 // Python generators for custom blocks
 pythonGenerator.forBlock['start_flag'] = function(block, generator) {
-    return '# Program starts here\n';
+    return '# Program starts here\nsend_message(\'Wake Up\')\n';
 };
 
 pythonGenerator.forBlock['stop_flag'] = function(block, generator) {
@@ -71,7 +71,7 @@ javascriptGenerator.INFINITE_LOOP_TRAP = 'if(--window.LoopTrap == 0) throw "Infi
 
 // JavaScript generators for custom blocks
 javascriptGenerator.forBlock['start_flag'] = function(block, generator) {
-    return '// Program starts here\n';
+    return '// Program starts here\nsend_msg(\'Wake Up\');\n';
 };
 
 javascriptGenerator.forBlock['stop_flag'] = function(block, generator) {
@@ -170,7 +170,7 @@ javascriptGenerator.forBlock['send_cmd_dropdown'] = function(block, generator) {
 };
 
 javascriptGenerator.forBlock['start_flag'] = function(block, generator) {
-    return '// Program starts here\n';
+    return '// Program starts here\nsend_msg(\'Wake Up\');\n';
 };
 
 javascriptGenerator.forBlock['stop_flag'] = function(block, generator) {
