@@ -1,0 +1,418 @@
+/* Bluetooth Modal Styles */
+#bluetoothModal .modal-header {
+    background-color: var(--bluetooth);
+    color: white;
+}
+
+/* Debug Modal Layout */
+.bt-debug-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    height: 100%;
+    min-height: 500px;
+}
+
+.bt-debug-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.bt-tools-section, .bt-log-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.bt-tools-section h3, .bt-log-section h3 {
+    margin: 0 0 15px 0;
+    color: var(--accent);
+    font-size: 1.2em;
+    font-weight: 600;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--secondary);
+}
+
+.tools-list {
+    background-color: var(--background);
+    border: 1px solid var(--secondary);
+    border-radius: 8px;
+    padding: 15px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.bt-log-section {
+    flex: 1;
+}
+
+.log-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.bt-log {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 15px;
+    border-radius: 8px;
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid var(--secondary);
+    height: 300px; /* Fixed height instead of min-height */
+    max-height: 300px; /* Prevent expansion */
+}
+
+/* Responsive Design for Debug Modal */
+@media (max-width: 1024px) {
+    .bt-debug-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .tools-list {
+        max-height: 200px;
+    }
+    
+    .bt-log {
+        min-height: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .bt-debug-container {
+        gap: 10px;
+    }
+    
+    .log-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .tools-list {
+        max-height: 150px;
+    }
+    
+    .bt-log {
+        min-height: 150px;
+        font-size: 11px;
+    }
+}
+
+.bt-status-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--background);
+    border-radius: 8px;
+    border: 1px solid var(--secondary);
+}
+
+.connection-status {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.status {
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 120px;
+    transition: all 0.3s ease;
+}
+
+.status.connected {
+    background-color: var(--save-primary);
+    color: white;
+}
+
+.status.disconnected {
+    background-color: var(--warning);
+    color: white;
+}
+
+.status.connecting {
+    background-color: var(--category-conditional);
+    color: var(--text);
+}
+
+.connection-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.bt-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.bt-btn:hover {
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+}
+
+.bt-btn:active {
+    transform: translateY(0);
+}
+
+.connect-btn {
+    background-color: var(--bluetooth);
+    color: white;
+}
+
+.disconnect-btn {
+    background-color: var(--warning);
+    color: white;
+}
+
+.small-btn {
+    padding: 8px 15px;
+    font-size: 0.9em;
+}
+
+.reload-tools-btn {
+    width: 100%;
+    background-color: var(--bluetooth);
+    color: white;
+    margin-top: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.reload-tools-btn:disabled {
+    background-color: var(--secondary);
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+.reload-tools-btn:disabled:hover {
+    filter: none;
+    transform: none;
+}
+
+.bt-tools-section, .bt-log-section {
+    margin-bottom: 20px;
+}
+
+.bt-tools-section h3, .bt-log-section h3 {
+    margin: 0 0 10px 0;
+    color: var(--accent);
+    font-size: 1.1em;
+}
+
+.tools-list {
+    background-color: var(--background);
+    border: 1px solid var(--secondary);
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 60px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.no-tools {
+    color: var(--tool);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.tool-item {
+    background-color: var(--category-santa);
+    color: white;
+    padding: 8px 12px;
+    margin: 5px;
+    border-radius: 6px;
+    display: inline-block;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.tools-status {
+    background-color: var(--category-conditional);
+    color: var(--text);
+    padding: 8px 12px;
+    margin: 5px 5px 10px 5px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 500;
+    text-align: center;
+}
+
+.log-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.auto-scroll-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9em;
+    color: var(--tool);
+}
+
+.auto-scroll-label input[type="checkbox"] {
+    margin: 0;
+}
+
+.bt-log {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 15px;
+    border-radius: 8px;
+    height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--secondary);
+}
+
+.log-entry {
+    margin-bottom: 3px;
+    line-height: 1.4;
+}
+
+.log-timestamp {
+    color: #6a9955;
+    font-weight: normal;
+}
+
+.log-type-info {
+    color: #4fc1ff;
+}
+
+.log-type-success {
+    color: #73c991;
+}
+
+.log-type-error {
+    color: #f48771;
+}
+
+.log-type-warning {
+    color: #dcdcaa;
+}
+
+.log-type-received {
+    color: #ce9178;
+}
+
+/* Button loading states */
+.bt-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.bt-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Top bar button states */
+#bleBtn.loading {
+    position: relative;
+    color: transparent;
+}
+
+#bleBtn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+#bleBtn.warning {
+    background-color: var(--warning) !important;
+    color: white !important;
+}
+
+#bleBtn.connected {
+    background-color: var(--save-primary) !important;
+    color: white !important;
+}
+
+/* Clickable reconnect toast styles */
+.toast.clickable-reconnect {
+    cursor: pointer !important;
+    background: linear-gradient(135deg, var(--bluetooth), var(--save-primary)) !important;
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transform: translateX(0) scale(1.02);
+    animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+.toast.clickable-reconnect:hover {
+    transform: translateX(0) scale(1.05) !important;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+    filter: brightness(1.1);
+}
+
+.toast.clickable-reconnect:active {
+    transform: translateX(0) scale(0.98) !important;
+}
+
+@keyframes gentle-pulse {
+    0%, 100% { 
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(138, 144, 186, 0.4);
+    }
+    50% { 
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 0 0 8px rgba(138, 144, 186, 0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .connection-buttons {
+        flex-direction: column;
+    }
+    
+    .log-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .bt-log {
+        height: 150px;
+    }
+}

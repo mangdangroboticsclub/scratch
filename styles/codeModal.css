@@ -1,0 +1,34 @@
+#codeModal .modal-header {
+    background-color: var(--accent);
+    color: white
+}
+
+#codeModal .code-copy-btn {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+#codeModal button {
+    background-color: var(--primary);
+    color: var(--text);
+    border: none;
+    border-radius: 28px;
+    padding: 10px 20px;
+    margin: 8px;
+    font-size: large;   
+}
+
+#codeModal button:hover {
+    filter: brightness(0.9);
+    cursor: pointer;
+}
+
+#copySantaBtn {
+    background-color: var(--category-santa) !important;
+    color: white !important;
+}
+
+#codeModal .token, #codeOutput {
+    font-family: monospace !important;
+}

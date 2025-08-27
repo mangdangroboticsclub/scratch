@@ -1,0 +1,5 @@
+{
+  "kind": "block",
+  "type": "procedures_defnoreturn",
+  "fields": { "NAME": "doSomething" }
+}

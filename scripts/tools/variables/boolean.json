@@ -1,0 +1,7 @@
+{
+  "kind": "block",
+  "type": "logic_boolean",
+  "fields": {
+    "BOOL": "TRUE"
+  }
+}

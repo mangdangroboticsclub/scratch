@@ -1,0 +1,56 @@
+{
+  "conditionals": {
+    "files": [
+      "scripts/tools/conditionals/comparison.json",
+      "scripts/tools/conditionals/if_else.json"
+    ]
+  },
+  "functions": {
+    "files": [
+      "scripts/tools/functions/defnoreturn.json",
+      "scripts/tools/functions/defreturn.json"
+    ]
+  },
+  "loops": {
+    "files": [
+      "scripts/tools/loops/for_do.json",
+      "scripts/tools/loops/while_do.json"
+    ]
+  },
+  "mainloop": {
+    "files": [
+      "scripts/tools/mainloop/start.json",
+      "scripts/tools/mainloop/stop.json"
+    ]
+  },
+  "operations": {
+    "files": [
+      "scripts/tools/operations/arithmetic.json",
+      "scripts/tools/operations/lists_create_with.json",
+      "scripts/tools/operations/lists_getIndex.json",
+      "scripts/tools/operations/lists_length.json",
+      "scripts/tools/operations/lists_setIndex.json",
+      "scripts/tools/operations/logic_negate.json",
+      "scripts/tools/operations/logic_operation.json",
+      "scripts/tools/operations/number_property.json",
+      "scripts/tools/operations/random_int.json",
+      "scripts/tools/operations/text_join.json",
+      "scripts/tools/operations/text_length.json"
+    ]
+  },
+  "santa": {
+    "files": [
+      "scripts/tools/santa/dropdown.json",
+      "scripts/tools/santa/send_text.json"
+    ]
+  },
+  "variables": {
+    "files": [
+      "scripts/tools/variables/assign_variables.json",
+      "scripts/tools/variables/boolean.json",
+      "scripts/tools/variables/call_variables.json",
+      "scripts/tools/variables/integer.json",
+      "scripts/tools/variables/text.json"
+    ]
+  }
+}

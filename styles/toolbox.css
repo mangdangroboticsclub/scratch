@@ -1,0 +1,20 @@
+.blocklyToolboxCategoryLabel {
+  color: var(--text);
+}
+/* Adds padding around the group of categories and separators. */
+.blocklyToolboxContents {
+  padding: 0.5em;
+}
+/* Adds space between the categories, rounds the corners and adds space around the label. */
+.blocklyToolboxCategory {
+  padding: 8px 12px;
+  margin: 15px 0;
+  margin-left: 10px;
+  border-top-left-radius: 60px;
+  border-bottom-left-radius: 60px;
+  /* display: block; */
+}
+
+.blocklyTreeSeparator {
+  border-bottom: none !important;
+}

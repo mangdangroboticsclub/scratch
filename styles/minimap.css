@@ -1,0 +1,37 @@
+/* Minimap styling */
+.blockly-minimap {
+    transition: opacity 0.3s ease-in-out;
+    /* Ensure minimap is properly sized */
+    max-width: 20% !important;
+    max-height: 20% !important;
+    min-width: 120px !important;
+    min-height: 70px !important;
+    /* Better positioning */
+    z-index: 1000;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    /* Hidden by default */
+    opacity: 0;
+    pointer-events: none;
+    top: 0; /* Position top dynamically via JS to match topBar height */
+}
+
+.blockly-minimap.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.blockly-minimap.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Ensure the minimap workspace scales properly */
+.blockly-minimap .blocklyMainBackground {
+    fill: #f9f9f9;
+}
+
+.blockly-minimap .blocklyFlyoutBackground {
+    fill: transparent;
+}

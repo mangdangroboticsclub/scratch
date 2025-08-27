@@ -1,0 +1,5 @@
+{
+  "kind": "block",
+  "type": "lists_setIndex",
+  "fields": { "MODE": "SET", "WHERE": "FROM_START" }
+}

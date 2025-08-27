@@ -1,0 +1,60 @@
+/* Run Dropdown Styles */
+.run-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+#runDropdown {
+    display: none;
+    position: absolute;
+    background-color: var(--background);
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: 1px solid var(--secondary);
+    border-radius: 8px;
+    z-index: 1000;
+    top: 100%;
+    right: 0;
+    padding: 8px 0;
+}
+
+.run-dropdown-item {
+    color: var(--text);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+}
+
+.run-dropdown-item:hover {
+    background-color: var(--secondary);
+}
+
+.run-dropdown-item:active {
+    background-color: var(--accent);
+    color: white;
+}
+
+/* Execution state indicators */
+.execution-running {
+    animation: pulse-green 1s ease-in-out infinite;
+}
+
+.execution-paused {
+    animation: pulse-yellow 1s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+    0%, 100% { background-color: var(--success); }
+    50% { background-color: transparent; }
+}
+
+@keyframes pulse-yellow {
+    0%, 100% { background-color: #ffcc00; }
+    50% { background-color: transparent; }
+}

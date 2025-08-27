@@ -1,0 +1,369 @@
+#topBar button {
+    pointer-events: auto;
+    padding: 10px 20px;
+    margin: 8px;
+    background-color: var(--primary);
+    color: var(--text);
+    border: none;
+    border-radius: 28px;
+    font-size: medium;
+    position: relative;
+    z-index: 10; /* Higher than dropdown menu */
+}
+
+/* Toggle Toolbox Container */
+.toggle-toolbox-container {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    margin: 8px 8px 8px 0px !important;
+    overflow: visible !important;
+}
+
+.toggle-toolbox-background {
+    position: absolute !important;
+    top: 0 !important;
+    right: 100% !important;
+    width: 200px !important;
+    height: 100% !important;
+    background-color: var(--primary) !important;
+    border-radius: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+/* Toggle Toolbox Button - Only the visible right part */
+.toggle-toolbox {
+    padding: 10px 20px !important;
+    margin: 0 !important;
+    background-color: var(--primary) !important;
+    color: var(--text) !important;
+    border: none !important;
+    border-radius: 0 28px 28px 0 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    min-width: 50px !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    z-index: 1 !important;
+}
+
+.toggle-toolbox-arrow {
+    transition: transform 0.2s linear !important;
+    display: inline-block !important;
+    pointer-events: none !important;
+}
+
+.toggle-toolbox:active {
+    transform: scale(0.98) !important;
+}
+
+/* Ripple effect */
+.toggle-toolbox .ripple-effect {
+    position: absolute !important;
+    border-radius: 50% !important;
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    transform: scale(0) !important;
+    animation: ripple-animation 0.6s linear !important;
+    pointer-events: none !important;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+#topBar .toggle-toolbox:hover {
+    filter: none;
+    cursor: pointer;
+}
+
+#topBar button:hover {
+    filter: brightness(0.9);
+    cursor: pointer;
+}
+
+/* Bluetooth Button Container */
+.bluetooth-button-container {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.bt-main-button {
+    background-color: var(--bluetooth) !important;
+    color: white !important;
+    border: none;
+    padding: 10px 28px 10px 16px; /* Extra right padding for debug indicator */
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: filter 0.3s ease; /* Changed to filter transition */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    min-height: 40px;
+    font-family: 'Khand', sans-serif;
+}
+
+.bt-main-button .bt-icon {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.bt-main-button .bt-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.bt-main-button:hover {
+    filter: brightness(0.9); /* Consistent with other topBar buttons */
+}
+
+.bt-status-badge {
+    background-color: var(--secondary);
+    color: var(--text);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Status Badge States */
+.bt-status-disconnected {
+    background-color: var(--tool); /* Changed to --tool color */
+    color: white; /* Changed to white for better contrast */
+}
+
+.bt-status-disconnected:hover {
+    background-color: var(--success);
+    color: white;
+}
+
+/* Main button hover affects status badge color */
+.bt-main-button:hover .bt-status-disconnected {
+    background-color: var(--success);
+    color: white;
+}
+
+.bt-status-connecting {
+    background-color: var(--tool); /* Changed to --tool color */
+    color: white;
+    cursor: not-allowed;
+    animation: pulse-connecting 1.5s infinite;
+}
+
+/* Main button hover affects connecting status (though it's usually disabled) */
+.bt-main-button:hover .bt-status-connecting {
+    background-color: var(--tool);
+    color: white;
+}
+
+@keyframes pulse-connecting {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.bt-status-connected {
+    background-color: var(--success);
+    color: white;
+}
+
+.bt-status-connected:hover {
+    background-color: var(--error);
+}
+
+/* Main button hover affects status badge color */
+.bt-main-button:hover .bt-status-connected {
+    background-color: var(--error);
+}
+
+.bt-status-warning {
+    background-color: var(--error);
+    color: white;
+    animation: pulse-warning 2s infinite;
+}
+
+/* Main button hover affects warning status */
+.bt-main-button:hover .bt-status-warning {
+    background-color: var(--error);
+    color: white;
+}
+
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.bt-debug-button {
+    background-color: transparent; /* Removed background */
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border for visibility */
+    /* Increase debug icon size without affecting main button height */
+    padding: 4px; /* Reduced from 6px */
+    border-radius: 50%;
+    font-size: 10px; /* Reduced from 12px */
+    cursor: pointer;
+    transition: filter 0.3s ease; /* Consistent transition */
+    min-height: 18px; /* Reduced from 24px */
+    width: 18px; /* Reduced from 24px */
+}
+
+.bt-debug-button.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.bt-debug-button:hover {
+    filter: brightness(0.9); /* Consistent with other buttons */
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle hover background */
+}
+
+/* Loading state for main button */
+.bt-main-button.loading {
+    pointer-events: none;
+}
+
+.bt-main-button.loading::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .bt-main-button {
+        padding: 8px 24px 8px 12px; /* Adjusted for responsive design */
+        font-size: 13px;
+        min-height: 36px;
+    }
+    
+    .bt-main-button::after {
+        right: 6px;
+        font-size: 9px;
+    }
+    
+    .bt-status-badge {
+        padding: 3px 6px;
+        font-size: 11px;
+    }
+    
+    .bt-debug-button {
+        padding: 3px; /* Reduced for smaller screens */
+        font-size: 9px; /* Reduced for smaller screens */
+        min-height: 16px; /* Reduced to match new smaller size */
+        width: 16px; /* Reduced to match new smaller size */
+    }
+}
+
+@media (max-width: 480px) {
+    .bt-main-button {
+        padding: 6px 22px 6px 10px; /* Adjusted for smallest screens */
+        font-size: 12px;
+        min-height: 32px;
+    }
+    
+    .bt-main-button::after {
+        right: 5px;
+        font-size: 8px;
+    }
+    
+    .bt-status-badge {
+        padding: 2px 5px;
+        font-size: 10px;
+    }
+    
+    .bt-debug-button {
+        padding: 2px; /* Reduced for smallest screens */
+        font-size: 8px; /* Reduced for smallest screens */
+        min-height: 14px; /* Reduced to match new smaller size */
+        width: 14px; /* Reduced to match new smaller size */
+    }
+}
+
+/* Loading state for status text */
+.bt-status-text.loading {
+    position: relative;
+    color: transparent;
+}
+
+.bt-status-text.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Remove old bluetooth button styles */
+/* #topBar #bleBtn {
+    background-color: var(--bluetooth);
+    color: white;
+} */
+
+/* Remove the old save button styles as it's now handled by dropdown.css */
+/* #topBar #saveBtn {
+    background-color: var(--save-primary);
+} */
+
+#topBar #codeBtn {
+    background-color: var(--secondary);
+}
+
+#topBar #runBtn {
+    background-color: var(--accent);
+    color: white;
+}
+
+#topBar #runBtn:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+}
+
+#topBar #stopBtn {
+    background-color: #e74c3c; /* Red color for stop */
+    color: white;
+}
+
+#topBar #stopBtn:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}

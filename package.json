@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@blockly/block-shareable-procedures": "^6.0.3",
+    "@blockly/shadow-block-converter": "^7.0.3",
+    "@blockly/workspace-minimap": "^0.3.2",
+    "blockly": "^12.2.0"
+  }
+}

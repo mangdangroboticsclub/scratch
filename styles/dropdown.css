@@ -1,0 +1,90 @@
+/* General Dropdown Styles */
+:root {
+    --dropdown-animation-duration: 0.8s;
+    --dropdown-shrink-duration: 0.3s;
+}
+
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    border-radius: 28px;
+    padding: 10px 20px;
+    margin: 8px;
+    font-size: medium;
+    cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10; /* Same as other topBar buttons */
+    transition: filter 0.2s ease, border-radius 0.2s ease;
+}
+
+.dropdown-button:hover {
+    filter: brightness(0.9);
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    transition: transform 0.2s ease;
+}
+
+.dropdown-button.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 26px; /* Start from halfway down the button (half of ~52px button height) */
+    left: 50%; /* Center the dropdown */
+    transform: translateX(-50%); /* Center horizontally */
+    width: 20%; /* Shrunk horizontally when hidden */
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+    z-index: -1; /* Clearly below the topBar */
+    overflow: hidden;
+    
+    /* Hidden by default - JavaScript will control display */
+    max-height: 0;
+    pointer-events: none;
+    transition: max-height var(--dropdown-animation-duration) ease,
+                width var(--dropdown-shrink-duration) ease var(--dropdown-animation-duration);
+    padding-top: 26px; /* Keep padding constant for now */
+}
+
+.dropdown-menu.active {
+    /* Fully expanded when active */
+    max-height: 700px; /* Increased max-height */
+    width: calc(100% - 16px); /* Full width when active (accounting for button margins) */
+    pointer-events: auto;
+    transition: width var(--dropdown-shrink-duration) ease,
+                max-height var(--dropdown-animation-duration) ease var(--dropdown-shrink-duration);
+}
+
+.dropdown-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-radius: 8px;
+    margin: 4px 8px;
+    font-size: medium;
+}
+
+.dropdown-item:first-child {
+    margin-top: 8px;
+}
+
+.dropdown-item:last-child {
+    margin-bottom: 8px;
+}
+
+/* Ensure the dropdown button extends visually with the menu when active */
+.dropdown-button.active {
+    border-radius: 14px 14px 28px 28px; /* Partially rounded top to match half extension */
+    margin-top: 0;
+}
