@@ -11,6 +11,8 @@ class BluetoothController {
         this.lastConnectionTime = null;
         this.sessionData = null;
         this.autoReconnectAttempted = false;
+        this.initializationRetries = 0;
+        this.maxInitializationRetries = 10;
         
         this.init();
     }
@@ -20,6 +22,9 @@ class BluetoothController {
         this.setupEventListeners();
         this.updateButtonState();
         this.updateStatus('disconnected');
+        
+        // Initialize execution UI state (robust for cloud hosting)
+        this.updateExecutionUI();
         
         // Attempt auto-reconnection after a short delay to allow other components to initialize
         setTimeout(() => {
@@ -252,9 +257,7 @@ class BluetoothController {
                         this.saveSessionData();
                         
                         // Update execution UI to enable run button
-                        if (window.updateExecutionUI) {
-                            window.updateExecutionUI();
-                        }
+                        this.updateExecutionUI();
                         
                         this.log('✅ Silent reconnection successful!', 'success');
                         
@@ -439,6 +442,46 @@ class BluetoothController {
         }
     }
 
+    // Robust method to update execution UI with retry logic for cloud hosting
+    updateExecutionUI() {
+        if (window.updateExecutionUI) {
+            try {
+                window.updateExecutionUI();
+                return true;
+            } catch (error) {
+                console.warn('⚠️ Error calling updateExecutionUI:', error);
+            }
+        }
+        
+        // If not available immediately, retry with exponential backoff
+        this.scheduleExecutionUIUpdate();
+        return false;
+    }
+
+    scheduleExecutionUIUpdate(attempt = 1) {
+        if (attempt > 5) {
+            console.warn('⚠️ Failed to update execution UI after 5 attempts');
+            return;
+        }
+
+        const delay = Math.min(100 * Math.pow(2, attempt - 1), 2000); // Exponential backoff, max 2s
+        
+        setTimeout(() => {
+            if (window.updateExecutionUI) {
+                try {
+                    window.updateExecutionUI();
+                    console.log(`✅ Execution UI updated on attempt ${attempt}`);
+                } catch (error) {
+                    console.warn(`⚠️ Execution UI update attempt ${attempt} failed:`, error);
+                    this.scheduleExecutionUIUpdate(attempt + 1);
+                }
+            } else {
+                console.log(`⏳ Execution UI not ready, retrying... (attempt ${attempt})`);
+                this.scheduleExecutionUIUpdate(attempt + 1);
+            }
+        }, delay);
+    }
+
     log(message, type = 'info') {
         const logEl = document.getElementById('btLog');
         if (!logEl) return;
@@ -526,9 +569,7 @@ class BluetoothController {
             this.log('✅ Connected successfully to Santa-Bot!', 'success');
 
             // Update execution UI to enable run button
-            if (window.updateExecutionUI) {
-                window.updateExecutionUI();
-            }
+            this.updateExecutionUI();
 
             // Save session data
             this.saveSessionData();
@@ -587,6 +628,9 @@ class BluetoothController {
             window.handleBluetoothDisconnection();
         }
         
+        // Update execution UI to disable run button
+        this.updateExecutionUI();
+        
         // Update session data to reflect disconnection
         this.saveSessionData();
         
@@ -605,10 +649,13 @@ class BluetoothController {
         // Save session data
         this.saveSessionData();
         
-        // Stop any running execution
+        // Stop any running execution and update UI
         if (window.handleBluetoothDisconnection) {
             window.handleBluetoothDisconnection();
         }
+        
+        // Update execution UI to disable run button
+        this.updateExecutionUI();
         
         if (window.toast) {
             window.toast.warning('Santa-Bot disconnected unexpectedly');
@@ -950,10 +997,43 @@ window.isBluetoothConnected = function() {
     }
 };
 
-// Initialize Bluetooth controller when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    window.bluetoothController = new BluetoothController();
-    
-    // Make it available as bleManager for compatibility with existing code
-    window.bleManager = window.bluetoothController;
+// Robust initialization for cloud hosting
+function initializeBluetoothController() {
+    try {
+        window.bluetoothController = new BluetoothController();
+        
+        // Make it available as bleManager for compatibility with existing code
+        window.bleManager = window.bluetoothController;
+        
+        console.log('✅ Bluetooth controller initialized successfully');
+        
+        // Ensure execution UI is updated after a delay to handle timing issues
+        setTimeout(() => {
+            if (window.bluetoothController) {
+                window.bluetoothController.updateExecutionUI();
+            }
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Failed to initialize Bluetooth controller:', error);
+        // Retry after a short delay
+        setTimeout(initializeBluetoothController, 1000);
+    }
+}
+
+// Multiple initialization strategies for robustness on cloud hosting
+if (document.readyState === 'loading') {
+    // DOM is still loading
+    document.addEventListener('DOMContentLoaded', initializeBluetoothController);
+} else {
+    // DOM is already loaded
+    initializeBluetoothController();
+}
+
+// Fallback initialization after window load
+window.addEventListener('load', () => {
+    if (!window.bluetoothController) {
+        console.log('🔄 Fallback: Initializing Bluetooth controller after window load');
+        initializeBluetoothController();
+    }
 });

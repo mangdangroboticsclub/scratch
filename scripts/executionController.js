@@ -28,32 +28,57 @@ function updateExecutionUI() {
   const runBtn = document.getElementById('runBtn');
   const stopBtn = document.getElementById('stopBtn');
   
-  if (runBtn && stopBtn) {
-    // Check Bluetooth connection status
-    const isBluetoothConnected = window.bleManager && window.bleManager.isConnected;
+  if (!runBtn || !stopBtn) {
+    // Buttons not available yet, schedule retry for cloud hosting robustness
+    setTimeout(updateExecutionUI, 100);
+    return;
+  }
+  
+  // Check Bluetooth connection status with multiple fallbacks for robustness
+  let isBluetoothConnected = false;
+  
+  // Primary check - bleManager
+  if (window.bleManager && typeof window.bleManager.isConnected === 'boolean') {
+    isBluetoothConnected = window.bleManager.isConnected;
+  }
+  // Fallback check - bluetoothController
+  else if (window.bluetoothController && typeof window.bluetoothController.isDeviceConnected === 'function') {
+    try {
+      isBluetoothConnected = window.bluetoothController.isDeviceConnected();
+    } catch (error) {
+      console.warn('⚠️ Error checking Bluetooth connection via bluetoothController:', error);
+    }
+  }
+  // Fallback check - global function
+  else if (window.isBluetoothConnected && typeof window.isBluetoothConnected === 'function') {
+    try {
+      isBluetoothConnected = window.isBluetoothConnected();
+    } catch (error) {
+      console.warn('⚠️ Error checking Bluetooth connection via global function:', error);
+    }
+  }
+  
+  if (isExecuting) {
+    // Show stop button, hide run button
+    runBtn.style.display = 'none';
+    stopBtn.style.display = 'inline-block';
+    stopBtn.disabled = false;
+  } else {
+    // Show run button, hide stop button
+    runBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'none';
     
-    if (isExecuting) {
-      // Show stop button, hide run button
-      runBtn.style.display = 'none';
-      stopBtn.style.display = 'inline-block';
-      stopBtn.disabled = false;
+    // Enable/disable run button based on Bluetooth connection
+    runBtn.disabled = !isBluetoothConnected;
+    
+    if (!isBluetoothConnected) {
+      runBtn.title = 'Connect to Santa-Bot first to run programs';
+      runBtn.style.opacity = '0.5';
+      runBtn.style.cursor = 'not-allowed';
     } else {
-      // Show run button, hide stop button
-      runBtn.style.display = 'inline-block';
-      stopBtn.style.display = 'none';
-      
-      // Enable/disable run button based on Bluetooth connection
-      runBtn.disabled = !isBluetoothConnected;
-      
-      if (!isBluetoothConnected) {
-        runBtn.title = 'Connect to Santa-Bot first to run programs';
-        runBtn.style.opacity = '0.5';
-        runBtn.style.cursor = 'not-allowed';
-      } else {
-        runBtn.title = 'Run Program';
-        runBtn.style.opacity = '1';
-        runBtn.style.cursor = 'pointer';
-      }
+      runBtn.title = 'Run Program';
+      runBtn.style.opacity = '1';
+      runBtn.style.cursor = 'pointer';
     }
   }
 }
@@ -594,4 +619,29 @@ setTimeout(() => {
   console.log('🎮 Enhanced Execution Controller functions overridden and secured');
 }, 100);
 
-console.log('🎮 Enhanced Execution Controller loaded with dynamic timing');
+// Robust initialization for cloud hosting
+function initializeExecutionUI() {
+  try {
+    updateExecutionUI();
+    console.log('✅ Execution UI initialized successfully');
+  } catch (error) {
+    console.warn('⚠️ Failed to initialize execution UI, retrying...', error);
+    setTimeout(initializeExecutionUI, 500);
+  }
+}
+
+// Initialize execution UI with multiple strategies for cloud hosting robustness
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initializeExecutionUI, 100);
+  });
+} else {
+  setTimeout(initializeExecutionUI, 100);
+}
+
+// Additional initialization after window load as fallback
+window.addEventListener('load', () => {
+  setTimeout(initializeExecutionUI, 200);
+});
+
+console.log('🎮 Enhanced Execution Controller loaded with dynamic timing and robust cloud hosting support');

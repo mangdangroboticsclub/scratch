@@ -151,6 +151,13 @@ const toolbox = {
 	  runBtn.addEventListener('click', () => {
 	    console.log('🔘 Run button clicked - starting enhanced block-by-block execution');
 	    
+	    // Check if button is disabled (for cloud hosting robustness)
+	    if (runBtn.disabled) {
+	      console.log('⚠️ Run button is disabled - checking Bluetooth connection');
+	      showToast('Please connect to Santa-Bot first', { duration: 3000 });
+	      return;
+	    }
+	    
 	    // Use the enhanced execution controller only
 	    if (window.runBlockByBlock) {
 	      window.runBlockByBlock(10); // 10ms default delay - very fast!
@@ -175,13 +182,27 @@ const toolbox = {
 	  });
 	}
 	
-	// Initialize execution UI state
-	setTimeout(() => {
+	// Robust execution UI initialization for cloud hosting
+	function initializeExecutionUIFromBlockly() {
 	  if (window.updateExecutionUI) {
-	    window.updateExecutionUI();
-	    console.log('✅ Execution UI initialized');
+	    try {
+	      window.updateExecutionUI();
+	      console.log('✅ Execution UI initialized from Blockly setup');
+	    } catch (error) {
+	      console.warn('⚠️ Error initializing execution UI from Blockly setup:', error);
+	      // Retry after a short delay
+	      setTimeout(initializeExecutionUIFromBlockly, 500);
+	    }
+	  } else {
+	    console.log('⏳ updateExecutionUI not ready, retrying from Blockly setup...');
+	    setTimeout(initializeExecutionUIFromBlockly, 200);
 	  }
-	}, 500); // Small delay to ensure all systems are loaded
+	}
+	
+	// Initialize with multiple attempts for robustness
+	setTimeout(initializeExecutionUIFromBlockly, 100);
+	setTimeout(initializeExecutionUIFromBlockly, 500);
+	setTimeout(initializeExecutionUIFromBlockly, 1000);
 
   })
   .catch(err => console.error('Error loading toolbox:', err));
