@@ -25,44 +25,51 @@ function showToast(message, options = {}) {
 }
 
 function updateExecutionUI() {
+  console.log('🎮 updateExecutionUI called');
+  
   const runBtn = document.getElementById('runBtn');
   const stopBtn = document.getElementById('stopBtn');
   
   if (!runBtn || !stopBtn) {
-    // Buttons not available yet, schedule retry for cloud hosting robustness
+    // Buttons not available yet, schedule retry
+    console.log('⚠️ Buttons not found, retrying in 100ms...');
     setTimeout(updateExecutionUI, 100);
     return;
   }
   
-  // Check Bluetooth connection status with multiple fallbacks for robustness
+  // Simple Bluetooth connection check with logging
   let isBluetoothConnected = false;
   
-  // Primary check - bleManager
+  // Try multiple methods to check connection
   if (window.bleManager && typeof window.bleManager.isConnected === 'boolean') {
     isBluetoothConnected = window.bleManager.isConnected;
-  }
-  // Fallback check - bluetoothController
-  else if (window.bluetoothController && typeof window.bluetoothController.isDeviceConnected === 'function') {
+    console.log('📡 Bluetooth check via bleManager:', isBluetoothConnected);
+  } else if (window.bluetoothController && typeof window.bluetoothController.isDeviceConnected === 'function') {
     try {
       isBluetoothConnected = window.bluetoothController.isDeviceConnected();
+      console.log('📡 Bluetooth check via bluetoothController:', isBluetoothConnected);
     } catch (error) {
-      console.warn('⚠️ Error checking Bluetooth connection via bluetoothController:', error);
+      console.warn('⚠️ Error checking via bluetoothController:', error);
     }
-  }
-  // Fallback check - global function
-  else if (window.isBluetoothConnected && typeof window.isBluetoothConnected === 'function') {
+  } else if (window.isBluetoothConnected && typeof window.isBluetoothConnected === 'function') {
     try {
       isBluetoothConnected = window.isBluetoothConnected();
+      console.log('📡 Bluetooth check via global function:', isBluetoothConnected);
     } catch (error) {
-      console.warn('⚠️ Error checking Bluetooth connection via global function:', error);
+      console.warn('⚠️ Error checking via global function:', error);
     }
+  } else {
+    console.log('📡 No Bluetooth check method available, assuming disconnected');
   }
+  
+  console.log(`🎮 Updating UI - Executing: ${isExecuting}, Bluetooth: ${isBluetoothConnected}`);
   
   if (isExecuting) {
     // Show stop button, hide run button
     runBtn.style.display = 'none';
     stopBtn.style.display = 'inline-block';
     stopBtn.disabled = false;
+    console.log('🎮 UI: Showing stop button');
   } else {
     // Show run button, hide stop button
     runBtn.style.display = 'inline-block';
@@ -75,10 +82,12 @@ function updateExecutionUI() {
       runBtn.title = 'Connect to Santa-Bot first to run programs';
       runBtn.style.opacity = '0.5';
       runBtn.style.cursor = 'not-allowed';
+      console.log('🎮 UI: Run button disabled (no Bluetooth)');
     } else {
       runBtn.title = 'Run Program';
       runBtn.style.opacity = '1';
       runBtn.style.cursor = 'pointer';
+      console.log('🎮 UI: Run button enabled (Bluetooth connected)');
     }
   }
 }
@@ -595,6 +604,69 @@ window.handleBluetoothDisconnection = handleBluetoothDisconnection;
 // Also expose the individual functions used by our existing interpreter
 window.initializeInterpreter = initializeInterpreter;
 window.highlightBlock = highlightBlock;
+
+// Debug functions for cloud hosting troubleshooting
+window.debugRunButton = function() {
+  console.log('🔍 Debug Run Button State:');
+  const runBtn = document.getElementById('runBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  
+  console.log('Run Button:', {
+    exists: !!runBtn,
+    disabled: runBtn?.disabled,
+    style: runBtn?.style.cssText,
+    onclick: !!runBtn?.onclick,
+    listeners: 'Cannot check addEventListener listeners'
+  });
+  
+  console.log('Stop Button:', {
+    exists: !!stopBtn,
+    disabled: stopBtn?.disabled,
+    style: stopBtn?.style.cssText,
+    onclick: !!stopBtn?.onclick
+  });
+  
+  console.log('Execution State:', {
+    isExecuting,
+    executionMode,
+    runBlockByBlock: !!window.runBlockByBlock,
+    stopExecution: !!window.stopExecution
+  });
+  
+  console.log('Bluetooth State:', {
+    bleManager: !!window.bleManager,
+    bluetoothController: !!window.bluetoothController,
+    isConnected: window.isBluetoothConnected ? window.isBluetoothConnected() : 'unknown'
+  });
+};
+
+// Force run execution (for debugging)
+window.forceRun = function() {
+  console.log('🚀 FORCE RUN triggered');
+  try {
+    if (window.runBlockByBlock) {
+      window.runBlockByBlock(10);
+    } else {
+      console.error('❌ runBlockByBlock not available');
+    }
+  } catch (error) {
+    console.error('❌ Force run error:', error);
+  }
+};
+
+// Force stop execution (for debugging)
+window.forceStop = function() {
+  console.log('🛑 FORCE STOP triggered');
+  try {
+    if (window.stopExecution) {
+      window.stopExecution();
+    } else {
+      console.error('❌ stopExecution not available');
+    }
+  } catch (error) {
+    console.error('❌ Force stop error:', error);
+  }
+};
 
 // Override any previously defined execution functions to ensure Enhanced Execution Controller takes precedence
 // This is necessary because the Xiaozhi interpreter (interpreter.js) loads before this file

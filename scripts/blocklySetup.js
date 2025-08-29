@@ -143,44 +143,145 @@ const toolbox = {
 	  console.error('❌ xiaozhiInterpreter not found on window object');
 	}
 	
-	// Setup run button with enhanced execution options
-	const runBtn = document.getElementById('runBtn');
-	const stopBtn = document.getElementById('stopBtn');
-	
-	if (runBtn) {
-	  runBtn.addEventListener('click', () => {
-	    console.log('🔘 Run button clicked - starting enhanced block-by-block execution');
+	// Simplified and robust run/stop button setup for cloud hosting
+	function setupRunStopButtons() {
+	  const runBtn = document.getElementById('runBtn');
+	  const stopBtn = document.getElementById('stopBtn');
+	  
+	  console.log('🔘 setupRunStopButtons called at:', new Date().toISOString());
+	  console.log('🔘 Button elements found:', { 
+	    runBtn: !!runBtn, 
+	    stopBtn: !!stopBtn,
+	    runBtnId: runBtn?.id,
+	    runBtnClass: runBtn?.className 
+	  });
+	  
+	  if (!runBtn || !stopBtn) {
+	    console.warn('⚠️ Run/Stop buttons not found, retrying...');
+	    setTimeout(setupRunStopButtons, 100);
+	    return;
+	  }
+	  
+	  // Log current state before setup
+	  console.log('🔘 Before setup - Button states:', {
+	    runBtnDisabled: runBtn.disabled,
+	    runBtnOnclick: !!runBtn.onclick,
+	    runBtnDisplay: runBtn.style.display
+	  });
+	  
+	  // Remove any existing event listeners first
+	  runBtn.onclick = null;
+	  stopBtn.onclick = null;
+	  
+	  // Simple, direct event handlers with extensive logging
+	  runBtn.onclick = function(e) {
+	    console.log('🚀 RUN BUTTON ONCLICK TRIGGERED!', { 
+	      timestamp: new Date().toISOString(),
+	      disabled: runBtn.disabled, 
+	      event: e?.type,
+	      target: e?.target?.id 
+	    });
 	    
-	    // Check if button is disabled (for cloud hosting robustness)
+	    // Prevent any event bubbling
+	    if (e) {
+	      e.preventDefault();
+	      e.stopPropagation();
+	    }
+	    
+	    // Simple disabled check
 	    if (runBtn.disabled) {
-	      console.log('⚠️ Run button is disabled - checking Bluetooth connection');
-	      showToast('Please connect to Santa-Bot first', { duration: 3000 });
-	      return;
+	      console.log('⚠️ Run button is disabled - showing alert');
+	      alert('Please connect to Santa-Bot first');
+	      return false;
 	    }
 	    
-	    // Use the enhanced execution controller only
-	    if (window.runBlockByBlock) {
-	      window.runBlockByBlock(10); // 10ms default delay - very fast!
-	    } else {
-	      console.error('❌ Enhanced execution controller not available');
-	      showToast('Execution system not ready. Please reload the page.', { duration: 3000 });
+	    // Simple execution - try multiple methods for robustness
+	    try {
+	      console.log('🎮 Attempting to start execution...');
+	      if (window.runBlockByBlock) {
+	        console.log('🎮 Calling runBlockByBlock...');
+	        window.runBlockByBlock(10);
+	        console.log('✅ runBlockByBlock called successfully');
+	      } else if (window.runContinuous) {
+	        console.log('🎮 Fallback: Calling runContinuous...');
+	        window.runContinuous();
+	        console.log('✅ runContinuous called successfully');
+	      } else {
+	        console.error('❌ No execution function available');
+	        alert('Execution system not ready. Please reload the page.');
+	      }
+	    } catch (error) {
+	      console.error('❌ Error during execution:', error);
+	      alert('Error starting execution: ' + error.message);
 	    }
-	  });
+	    
+	    return false;
+	  };
+	  
+	  stopBtn.onclick = function(e) {
+	    console.log('� STOP BUTTON CLICKED!', { event: e });
+	    
+	    // Prevent any event bubbling
+	    e.preventDefault();
+	    e.stopPropagation();
+	    
+	    // Simple stop execution
+	    try {
+	      if (window.stopExecution) {
+	        console.log('🎮 Stopping execution...');
+	        window.stopExecution();
+	      } else {
+	        console.error('❌ Stop function not available');
+	        alert('Stop function not ready. Please reload the page.');
+	      }
+	    } catch (error) {
+	      console.error('❌ Error during stop:', error);
+	      alert('Error stopping execution: ' + error.message);
+	    }
+	    
+	    return false;
+	  };
+	  
+	  // Also add addEventListener as backup
+	  runBtn.addEventListener('click', function(e) {
+	    console.log('🔄 Run button addEventListener backup triggered');
+	  }, { passive: false });
+	  
+	  stopBtn.addEventListener('click', function(e) {
+	    console.log('🔄 Stop button addEventListener backup triggered');
+	  }, { passive: false });
+	  
+	  console.log('✅ Run/Stop buttons setup complete');
 	}
 	
-	if (stopBtn) {
-	  stopBtn.addEventListener('click', () => {
-	    console.log('🔘 Stop button clicked - stopping execution');
-	    
-	    // Use the enhanced execution controller's stop function
-	    if (window.stopExecution) {
-	      window.stopExecution();
-	    } else {
-	      console.error('❌ Enhanced execution controller not available');
-	      showToast('Stop function not ready. Please reload the page.', { duration: 3000 });
-	    }
-	  });
-	}
+	// Setup buttons with multiple timing strategies
+	setupRunStopButtons();
+	setTimeout(setupRunStopButtons, 100);
+	setTimeout(setupRunStopButtons, 500);
+	
+	// Backup: Add window-level click handler as fallback
+	document.addEventListener('click', function(e) {
+	  if (e.target && e.target.id === 'runBtn') {
+	    console.log('🔄 Backup window click handler for runBtn triggered');
+	    // Only trigger if the direct onclick didn't work
+	    setTimeout(() => {
+	      const currentlyExecuting = window.isExecuting ? window.isExecuting() : false;
+	      if (!currentlyExecuting) {  // Check if execution didn't start
+	        console.log('🚀 Direct handler may have failed, triggering backup');
+	        if (window.forceRun) window.forceRun();
+	      }
+	    }, 50);
+	  } else if (e.target && e.target.id === 'stopBtn') {
+	    console.log('🔄 Backup window click handler for stopBtn triggered');
+	    setTimeout(() => {
+	      const currentlyExecuting = window.isExecuting ? window.isExecuting() : false;
+	      if (currentlyExecuting) {  // Check if execution didn't stop
+	        console.log('🛑 Direct handler may have failed, triggering backup');
+	        if (window.forceStop) window.forceStop();
+	      }
+	    }, 50);
+	  }
+	}, true); // Use capture phase
 	
 	// Robust execution UI initialization for cloud hosting
 	function initializeExecutionUIFromBlockly() {
