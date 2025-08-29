@@ -188,12 +188,7 @@ const toolbox = {
 	      e.stopPropagation();
 	    }
 	    
-	    // Simple disabled check
-	    if (runBtn.disabled) {
-	      console.log('⚠️ Run button is disabled - showing alert');
-	      alert('Please connect to Santa-Bot first');
-	      return false;
-	    }
+	    // Note: No disabled check needed since button is hidden when not connected
 	    
 	    // Simple execution - try multiple methods for robustness
 	    try {

@@ -64,31 +64,28 @@ function updateExecutionUI() {
   
   console.log(`🎮 Updating UI - Executing: ${isExecuting}, Bluetooth: ${isBluetoothConnected}`);
   
+  // Simple approach: Hide/show buttons based on connection and execution state
   if (isExecuting) {
-    // Show stop button, hide run button
+    // When executing: hide run button, show stop button
     runBtn.style.display = 'none';
     stopBtn.style.display = 'inline-block';
-    stopBtn.disabled = false;
-    console.log('🎮 UI: Showing stop button');
-  } else {
-    // Show run button, hide stop button
+    console.log('🎮 UI: Showing stop button (executing)');
+  } else if (isBluetoothConnected) {
+    // When connected but not executing: show run button, hide stop button
     runBtn.style.display = 'inline-block';
     stopBtn.style.display = 'none';
-    
-    // Enable/disable run button based on Bluetooth connection
-    runBtn.disabled = !isBluetoothConnected;
-    
-    if (!isBluetoothConnected) {
-      runBtn.title = 'Connect to Santa-Bot first to run programs';
-      runBtn.style.opacity = '0.5';
-      runBtn.style.cursor = 'not-allowed';
-      console.log('🎮 UI: Run button disabled (no Bluetooth)');
-    } else {
-      runBtn.title = 'Run Program';
-      runBtn.style.opacity = '1';
-      runBtn.style.cursor = 'pointer';
-      console.log('🎮 UI: Run button enabled (Bluetooth connected)');
-    }
+    // Remove any disabled state and ensure button works normally
+    runBtn.disabled = false;
+    runBtn.title = 'Run Program';
+    runBtn.style.opacity = '1';
+    runBtn.style.cursor = 'pointer';
+    runBtn.style.pointerEvents = 'auto';
+    console.log('🎮 UI: Showing run button (connected)');
+  } else {
+    // When not connected: hide both buttons
+    runBtn.style.display = 'none';
+    stopBtn.style.display = 'none';
+    console.log('🎮 UI: Hiding both buttons (no Bluetooth)');
   }
 }
 

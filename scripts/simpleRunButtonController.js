@@ -46,8 +46,8 @@ function setupSimpleRunButtons() {
         console.log('Event details:', {
             type: e?.type,
             timestamp: new Date().toISOString(),
-            buttonDisabled: runBtn.disabled,
-            buttonDisplay: runBtn.style.display
+            buttonDisplay: runBtn.style.display,
+            buttonVisible: getComputedStyle(runBtn).display !== 'none'
         });
         
         // Prevent event bubbling
@@ -56,12 +56,7 @@ function setupSimpleRunButtons() {
             e.stopPropagation();
         }
         
-        // Check if disabled
-        if (runBtn.disabled) {
-            console.log('⚠️ Button is disabled, showing alert');
-            alert('Please connect to Santa-Bot first to run programs');
-            return false;
-        }
+        // Note: No disabled check needed since button is hidden when not connected
         
         // Execute
         console.log('🎮 Starting execution...');
@@ -184,7 +179,7 @@ window.debugButtons = function() {
     
     console.log('Run Button:', {
         exists: !!runBtn,
-        disabled: runBtn?.disabled,
+        visible: runBtn ? getComputedStyle(runBtn).display !== 'none' : false,
         display: runBtn?.style.display,
         onclick: !!runBtn?.onclick,
         innerHTML: runBtn?.innerHTML
@@ -192,7 +187,7 @@ window.debugButtons = function() {
     
     console.log('Stop Button:', {
         exists: !!stopBtn,
-        disabled: stopBtn?.disabled,
+        visible: stopBtn ? getComputedStyle(stopBtn).display !== 'none' : false,
         display: stopBtn?.style.display,
         onclick: !!stopBtn?.onclick,
         innerHTML: stopBtn?.innerHTML
