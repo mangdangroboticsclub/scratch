@@ -10,7 +10,7 @@ pythonGenerator.forBlock['start_flag'] = function(block, generator) {
 };
 
 pythonGenerator.forBlock['stop_flag'] = function(block, generator) {
-    return '# Program ends here\n';
+    return '# Program ends here\nexecute_santa_command("self.system.quit", {})\n';
 };
 
 pythonGenerator.forBlock['send_msg'] = function(block, generator) {
@@ -75,7 +75,7 @@ javascriptGenerator.forBlock['start_flag'] = function(block, generator) {
 };
 
 javascriptGenerator.forBlock['stop_flag'] = function(block, generator) {
-    return '// Program ends here\ninterpreter.stop();\n';
+    return '// Program ends here\ncmd_dropdown("self.system.quit", {});\ninterpreter.stop();\n';
 };
 
 // Variable assignment with setVar tracking
@@ -174,7 +174,7 @@ javascriptGenerator.forBlock['start_flag'] = function(block, generator) {
 };
 
 javascriptGenerator.forBlock['stop_flag'] = function(block, generator) {
-    return '// Program ends here\ninterpreter.stop();\n';
+    return '// Program ends here\ncmd_dropdown("self.system.quit", {});\ninterpreter.stop();\n';
 };
 
 // Class wrapper for compatibility with existing code
